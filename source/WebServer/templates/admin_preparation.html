@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>QCM</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'control.js') }}" ></script>
+    </head>
+    <body>
+        <form id="common_information" display="block" action = "send_meta" method = "POST">
+            <h1>Thông tin chung</h1>
+            <p>Số nhóm câu hỏi: <input id="nb_groups" name="nb_groups" type="number" min="1" max="10" value=0 onchange="createGroups(document.getElementById('nb_groups').value);"> </p>
+            
+        </form>     
+    </body>
+</html>
