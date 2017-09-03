@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <title>QCM</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
+        <link rel="stylesheet" href = "{{ url_for('static', filename = 'tabs.css') }}" />
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'control_question.js') }}" ></script>
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'tabs.js') }}" ></script>
+    </head>
+    <body>
+        <form id="common_information" display="block" action = "send_meta" method = "POST">
+            
+            {% for key, value in result[2][0][0].items() %}
+            <p>{{key}}, {{value}}</p>
+            {% endfor %}
+            
+        <h1>Phần nhập thông tin về các câu hỏi</h1>
+        <br>
+        <form id="common_information" display="block" action = "send_questions" method = "POST">
+            <input type="number" name="nb_groups" value={{result[0]}} style="display:none;" >
+            
+            {% for i in range(result[0]) %}
+            
+            <button type="button" class="accordion">Nhóm câu hỏi {{ i + 1 }}</button>
+            <div class="panel" id="panel_{{i}}">
+                <div class="tab group_tab_{{i}}" id="group_tab_{{i}}"></div>
+                <button type="button" class="tablinks_{{i}} group_{{i}}_question_0" id="tablinks_group_{{i}}_question_0 active" onclick="tabs({{i}},0);">1</button>    
+                {% for j in range(1, result[1][i]["group_nb_questions"]) %}
+                    <button type="button" class="tablinks_{{i}} group_{{i}}_question_{{j}}" id="tablinks_group_{{i}}_question_{{j}}" onclick="tabs({{i}},{{j}});">{{j + 1}}</button>    
+                {% endfor %}
+
+                {% for j in range(result[1][i]["group_nb_questions"]) %}
+                <table class="tabcontent_{{i}} group_{{i}}_question_{{j}}" id="tabcontent_group_{{i}}_question_{{j}}" style="display:none">
+                    <tr>
+                        <td class="tdbold">Câu hỏi {{j + 1}}: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_content_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_content']}}"></td>
+                    </tr>
+
+                    {% for k in range(0, result[1][i]["group_nb_options"]) %}
+                        <tr>
+                            <td class="tdbold">Phương án {{k + 1}}: </td>
+                            {% if  result[2][i][j]['question_answer'] == k %}
+                                <td><input type="radio" name="question_answer_{{i}}_{{j}}" value="{{k}}" checked></td>
+                            {% else %}
+                                <td><input type="radio" name="question_answer_{{i}}_{{j}}" value="{{k}}"></td>
+                            {% endif %}
+                            
+                            <td class="tdlong"><input name="question_option_{{k}}_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_option_' + k|string ]}}"></td>
+                        </tr>
+                    {% endfor %}    
+                    
+                    <tr class="trnone">
+                        <td class="tdbold">Điểm cộng: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_bonus_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_bonus']}}"></td>
+                    </tr>
+                    <tr class="trnone">
+                        <td class="tdbold">Điểm trừ: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_penalty_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_penalty']}}"></td>
+                    </tr>
+                    <tr class="trnone">
+                        <td class="tdbold">Điểm cộng với Ngôi sao hy vọng: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_star_bonus_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_star_bonus']}}"></td>
+                    </tr>
+                    <tr class="trnone">
+                        <td class="tdbold">Điểm trừ với Ngôi sao hy vọng: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_star_penalty_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_star_penalty']}}"></td>
+                    </tr>
+                    <tr class="trnone">
+                        <td class="tdbold">Thời gian trả lời: </td>
+                        <td></td>
+                        <td class="tdlong"><input name="question_duration_{{i}}_{{j}}" type="text" value="{{result[2][i][j]['question_duration']}}"></td>
+                    </tr>
+                               
+             
+                </table>
+                {% endfor %}             
+                <div id="end_tab_{{i}}" style="display:none; "></div>
+                <br/>
+            </div>
+
+            {% endfor %}
+
+            <p id='submit'><input type='submit' value='Send'></input></p>
+            
+        </form> 
+            
+        </form>     
+    </body>
+</html>

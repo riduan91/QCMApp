@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <title>QCM</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
+    </head>
+    <body>
+        <h1>Trang chủ</h1>
+        <p><button><a href="/new_meta">Bạn muốn nhập thông tin về nhóm câu hỏi cho một bộ câu hỏi mới</a></button></p>
+		<p><button><a href="/view_meta">Bạn muốn xem, sửa chữa thông tin cho 1 nhóm câu hỏi đã nhập</a></button></p>
+		<p><button><a href="/view_question">Bạn muốn xem, sửa chữa 1 bộ câu hỏi đã nhập</a></button></p>
+    </body>
+</html>
