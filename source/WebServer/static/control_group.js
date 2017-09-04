@@ -58,7 +58,7 @@ function openTab(evt, i) {
     // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (j = 0; j < tablinks.length; j++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        tablinks[j].className = tablinks[j].className.replace(" active", "");
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
