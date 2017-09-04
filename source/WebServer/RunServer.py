@@ -83,21 +83,19 @@ def view_questions():
 def admin_start():
     if request.method == 'POST':
         parameters = request.form
+        series = parameters["series"]
         res1 = Group.getSeries();
         
-        Current.updateCurrentSeriesName(parameters["series"])
+        Current.updateCurrentSeriesName(series)
         Current.updateCurrentGroup(0)
         Current.updateCurrentPlayers(parameters["players"])        
         
-        res2 = Group.fetchCurrent()
-        return render_template("admin_start_1.html", result = (res1, res2))
+        res2 = Current.fetchCurrent()
+        return render_template("admin_start.html", result = (res1, res2))
     else:
-        res = Group.getSeries();
-        return render_template("admin_start_0.html", result = (res))
-
-
-
-
+        res1 = Group.getSeries();
+        res2 = Current.fetchCurrent()
+        return render_template("admin_start.html", result = (res1, res2))
 
 
 HOST = '0.0.0.0'

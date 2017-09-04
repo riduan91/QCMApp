@@ -14,14 +14,17 @@ DB = mongo_client[Constants.DBNAME]
 CurrentCollection = DB[Constants.CURRENT]
 
     
-def fetchCurrent(series):
-    return CurrentCollection.find_one({"_id": series})
+def fetchCurrent():
+    return CurrentCollection.find_one({"_id": "current"})
     
 def updateCurrentSeriesName(series):
-    CurrentCollection.update_one({"_id": series}, {"$set": {"series": series}}, upsert=True)
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"series": series}}, upsert=True)
+
+def updateCurrentGroup(group):
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"group": group}}, upsert=True)
     
-def updateCurrentPlayers(series, players_str):
+def updateCurrentPlayers(players_str):
     players_str = players_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",")
     players = players_str.split(",")
-    CurrentCollection.update_one({"_id": series}, {"$set": {"players": players}}, upsert=True)
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"players": players}}, upsert=True)
     
