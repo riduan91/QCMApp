@@ -9,9 +9,10 @@
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'control_question.js') }}" ></script>
     </head>
     <body>
-        <h1>Phần nhập thông tin về các câu hỏi</h1>
+        <h1>Phần nhập câu hỏi</h1>
         <br>
         <form id="common_information" display="block" action = "send_questions" method = "POST">
+            <p style="display:none" >Kí hiệu bộ câu hỏi (8 chữ cái tối đa, không có dấu cách): <input id="series" name="series" type="text" maxlength="8" size="10" value="{{result[2]}}"> </p>
             <input type="number" name="nb_groups" value={{result[0]}} style="display:none;" >
             
             {% for i in range(result[0]) %}
@@ -49,27 +50,27 @@
                     <tr class="trnone">
                         <td class="tdbold">Điểm cộng: </td>
                         <td></td>
-                        <td class="tdlong"><input name="question_bonus_{{i}}_{{j}}" type="text"></td>
+                        <td class="tdlong"><input name="question_bonus_{{i}}_{{j}}" type="text" value="{{result[1][i]['group_bonus']}}"></td>
                     </tr>
                     <tr class="trnone">
                         <td class="tdbold">Điểm trừ: </td>
                         <td></td>
-                        <td class="tdlong"><input name="question_penalty_{{i}}_{{j}}" type="text"></td>
+                        <td class="tdlong"><input name="question_penalty_{{i}}_{{j}}" type="text" value="{{result[1][i]['group_penalty']}}"></td>
                     </tr>
                     <tr class="trnone">
                         <td class="tdbold">Điểm cộng với Ngôi sao hy vọng: </td>
                         <td></td>
-                        <td class="tdlong"><input name="question_star_bonus_{{i}}_{{j}}" type="text"></td>
+                        <td class="tdlong"><input name="question_star_bonus_{{i}}_{{j}}" type="text" value="{{result[1][i]['group_star_bonus']}}"></td>
                     </tr>
                     <tr class="trnone">
                         <td class="tdbold">Điểm trừ với Ngôi sao hy vọng: </td>
                         <td></td>
-                        <td class="tdlong"><input name="question_star_penalty_{{i}}_{{j}}" type="text"></td>
+                        <td class="tdlong"><input name="question_star_penalty_{{i}}_{{j}}" type="text" value="{{result[1][i]['group_star_penalty']}}"></td>
                     </tr>
                     <tr class="trnone">
                         <td class="tdbold">Thời gian trả lời: </td>
                         <td></td>
-                        <td class="tdlong"><input name="question_duration_{{i}}_{{j}}" type="text"></td>
+                        <td class="tdlong"><input name="question_duration_{{i}}_{{j}}" type="text" value="{{result[1][i]['group_question_duration']}}"></td>
                     </tr>
                                
              

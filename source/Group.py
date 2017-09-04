@@ -11,11 +11,21 @@ from pymongo import MongoClient
 mongo_client = MongoClient('localhost', 27017)
 
 DB = mongo_client[Constants.DBNAME]
-series = "Series1"
-GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
-QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
+CurrentCollection = DB[Constants.CURRENT]
+
+def getSeries():
+    series_with_suffix = DB.collection_names()
+    res = []
+    for item in series_with_suffix:
+        if ("__" + Constants.GROUP_SUFFIX in item):
+            pos = item.index("__")
+            res.append(item[:pos])
+    return res
 
 def updateGroups(query):
+    
+    series = query["series"];
+    GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
     
     nb_groups = int(query["nb_groups"]);
     groups = []
@@ -29,8 +39,16 @@ def updateGroups(query):
             groups[gr]["group_star_bonus"] = 0
         if (not "group_star_penalty_" + str(gr) in query.keys()):
             groups[gr]["group_star_penalty"] = 0
+        if (not "group_star_lose_turn_" + str(gr) in query.keys()):
+            groups[gr]["group_star_lose_turn"] = 0
         if (not "group_nb_options_" + str(gr) in query.keys()):
             groups[gr]["group_nb_options"] = 4
+        if (not "group_nb_players_" + str(gr) in query.keys()):
+            groups[gr]["group_nb_players"] = 0
+        if (not "group_player_names_" + str(gr) in query.keys()):
+            groups[gr]["group_player_names"] = []
+        if (not "group_start_timestamp_" + str(gr) in query.keys()):
+            groups[gr]["group_start_timestamp"] = ""
         
     for key, value in query.items():
         #parseData
@@ -49,11 +67,14 @@ def updateGroups(query):
     
     return
 
-def fetchGroups():
+def fetchGroups(series):
+    GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
     return list(GroupCollection.find({}))
     
-def updateQuestions(query):
-    groups = fetchGroups()
+def updateQuestions(series, query):    
+    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
+    
+    groups = fetchGroups(series)
     
     questions = []
     nb_questions_in_collection = QuestionCollection.count()
@@ -85,9 +106,11 @@ def updateQuestions(query):
          
     return
 
-def fetchQuestions():
+def fetchQuestions(series):
+    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
+    
     res_list = list(QuestionCollection.find({}))
-    groups = fetchGroups()
+    groups = fetchGroups(series)
     
     questions = []
     for gr in range(len(groups)):
@@ -104,13 +127,11 @@ def fetchQuestions():
             if (key != "_id"):
                 questions[gr][q][key] = value
     
-    return questions
-        
+    return questions       
 
 def convertInt(s):
     try:
         return int(s)
     except ValueError:
         return s
-
 

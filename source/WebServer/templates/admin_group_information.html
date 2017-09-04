@@ -7,18 +7,126 @@
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'tabs.css') }}" />
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'control.js') }}" ></script>
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'control_group.js') }}" ></script>
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'tabs.js') }}" ></script>
     </head>
     <body>
-        <form id="common_information" display="block" action = "send_meta" method = "POST">
-            <!--
-            {% for key, value in result[1].items() %}
-            <p>{{key}}, {{value}}</p>
-            {% endfor %}
-            -->
-            <h1>Thông tin chung</h1>
+        <h1>Phần xem thông tin về các nhóm câu hỏi</h1>
+        <br>
+        <form id="common_information" display="block" action = "update_meta" method = "POST">
+            <h2>Thông tin chung</h2>
+            <p>Kí hiệu bộ câu hỏi (8 chữ cái tối đa, không có dấu cách): <input id="series" name="series" type="text" maxlength="8" size="10" value="{{result[2]}}" style="display:none" > </p>
+            <p>Số nhóm câu hỏi: <input id="nb_groups" name="nb_groups" type="number" min="1" max="10" value="{{result[0]}}" onchange="createGroups(document.getElementById('nb_groups').value);"> </p>
+
+            <h2>Bảng thông tin về các nhóm câu hỏi</h2>
+            <div class="tab" id="group_tab">
             
-            <p>Số nhóm câu hỏi: <input id="nb_groups" name="nb_groups" type="number" min="1" max="10" value= {{result[0]}} onchange="changeGroups(document.getElementById('nb_groups').value);"></p>
+            {% for i in range(result[0]) %}
+                <button type="button" class="tablinks group_{{i}}" id="tablinks_group_{{i}}" onclick="openTab(event, {{i}})">Nhóm câu hỏi {{i+1}}</button>            
+            {% endfor %}            
+
+            </div>
+
+            {% for i in range(result[0]) %}
+                <table class="tabcontent group_{{i}}" id="tabcontent_group_{{i}}">
+            
+                    <tr><td class="tdbold">Số người tham gia (để -1 nếu không giới hạn): </td><td><input name="group_nb_players_max_{{i}}" type="number" value="{{result[1][i]['group_nb_players_max']}}"> người</td><td></td><td></td></tr>
+                    <tr><td class="tdbold">Số câu hỏi: </td><td><input name="group_nb_questions_{{i}}" type="number" value="{{result[1][i]['group_nb_questions']}}"></td><td></td><td></td></tr>
+                    
+                    {% if result[1][i]["group_question_type"] == 1 %}
+                        <tr><td class="tdbold">Loại câu hỏi: </td><td><input type="radio" class="group_{{i}}" + name="group_question_type_{{i}}" value=1 checked>Trắc nghiệm</td><td></td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Loại câu hỏi: </td><td><input type="radio" class="group_{{i}}" + name="group_question_type_{{i}}" value=1>Trắc nghiệm</td><td></td><td></td></tr>
+                    {% endif %}                    
+
+                    <tr id="p_nb_options_{{i}}"><td class="tdbold">Số phương án: </td><td><input name="group_nb_options_{{i}}" type="number" value="{{result[1][i]['group_nb_options']}}"></td><td></td><td></td></tr> 
+
+                    {% if result[1][i]["group_see_self_point"] == 1 %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn điểm số của mình: </td><td><input type="radio" name="group_see_self_point_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_self_point_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                       <tr><td class="tdbold">Người chơi được quyền nhìn điểm số của mình: </td><td><input type="radio" name="group_see_self_point_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_self_point_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %} 
+
+                    {% if result[1][i]["group_see_other_points"] == 1 %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn điểm số của người khác: </td><td><input type="radio" name="group_see_other_points_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_other_points_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn điểm số của người khác: </td><td><input type="radio" name="group_see_other_points_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_other_points_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %} 
+
+                    {% if result[1][i]["group_see_self_answer"] == 1 %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn câu trả lời của mình: </td><td><input type="radio" name="group_see_self_answer_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_self_answer_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn câu trả lời của mình: </td><td><input type="radio" name="group_see_self_answer_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_self_answer_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %} 
+
+                    {% if result[1][i]["group_see_other_answer"] == 1 %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn câu trả lời của người khác: </td><td><input type="radio" name="group_see_other_answer_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_other_answer_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Người chơi được quyền nhìn câu trả lời của người khác: </td><td><input type="radio" name="group_see_other_answer_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_other_answer_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %} 
+
+                    {% if result[1][i]["group_see_correct_answer"] == 1 %}
+                        <tr><td class="tdbold">Người chơi được quyền xem đáp án đúng: </td><td><input type="radio" name="group_see_correct_answer_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_correct_answer_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Người chơi được quyền xem đáp án đúng: </td><td><input type="radio" name="group_see_correct_answer_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_correct_answer_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %}
+
+                    {% if result[1][i]["group_see_countdown"] == 1 %}
+                        <tr><td class="tdbold">Người chơi thấy đồng hồ đếm ngược: </td><td><input type="radio" name="group_see_countdown_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_see_countdown_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Người chơi thấy đồng hồ đếm ngược: </td><td><input type="radio" name="group_see_countdown_{{i}}" value=1>Có </td><td><input type="radio" name="group_see_countdown_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %}
+
+                    {% if result[1][i]["group_next_question_on"] == 1 %}
+                        <tr><td class="tdbold">Chuyển qua câu hỏi kế tiếp: </td><td><input type="radio" name="group_next_question_on_{{i}}" value=1 checked>Tự động </td><td><input type="radio" name="group_next_question_on_{{i}}" value=0>Người điều khiển bấm</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Chuyển qua câu hỏi kế tiếp: </td><td><input type="radio" name="group_next_question_on_{{i}}" value=1>Tự động </td><td><input type="radio" name="group_next_question_on_{{i}}" value=0 checked>Người điều khiển bấm</td><td></td></tr>
+                    {% endif %}
+
+                    <tr><td class="tdbold">Thời gian suy nghĩ / tổng nhóm câu hỏi (để -1 nếu không giới hạn): </td><td><input name="group_group_duration_{{i}}" type="number" value="{{result[1][i]['group_group_duration']}}"> giây</td><td></td><td></td></tr>
+                    <tr><td class="tdbold">Thời gian giới hạn cho mỗi câu hỏi (để -1 nếu vô hạn): </td><td><input name="group_question_duration_{{i}}" type="number" value="{{result[1][i]['group_question_duration']}}"> giây</td><td></td><td></td></tr>
+                    
+                    <tr><td class="tdbold"><h3 id="group_method_{{i}}">Cách chơi: </h3></td><td></td><td></td><td></td></tr>
+
+
+                    {% if result[1][i]["group_answer_mode"] == 0 %}
+                        <tr><td class="tdbold">Điểm chỉ được tính đến: </td><td><input type="radio" name="group_answer_mode_{{i}}" value=0 checked>Người trả lời nhanh nhất </td><td><input type="radio" name="group_answer_mode_{{i}}" value=1>Người trả lời đúng và nhanh nhất</td><td><input type="radio" name="group_answer_mode_{{i}}" value=2>Tất cả</td></tr>
+                    {% elif result[1][i]["group_answer_mode"] == 1 %}
+                        <tr><td class="tdbold">Điểm chỉ được tính đến: </td><td><input type="radio" name="group_answer_mode_{{i}}" value=0>Người trả lời nhanh nhất </td><td><input type="radio" name="group_answer_mode_{{i}}" value=1 checked>Người trả lời đúng và nhanh nhất</td><td><input type="radio" name="group_answer_mode_{{i}}" value=2>Tất cả</td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Điểm chỉ được tính đến: </td><td><input type="radio" name="group_answer_mode_{{i}}" value=0>Người trả lời nhanh nhất </td><td><input type="radio" name="group_answer_mode_{{i}}" value=1>Người trả lời đúng và nhanh nhất</td><td><input type="radio" name="group_answer_mode_{{i}}" value=2 checked>Tất cả</td></tr>
+                    {% endif %}
+                    
+                    {% if result[1][i]["group_stars_accepted"] == 1 %}
+                        <tr><td class="tdbold">Có quyền chọn Ngôi sao hy vọng: </td><td><input type="radio" class="group_{{i}}" + name="group_stars_accepted_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_stars_accepted_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Có quyền chọn Ngôi sao hy vọng: </td><td><input type="radio" class="group_{{i}}" + name="group_stars_accepted_{{i}}" value=1>Có </td><td><input type="radio" name="group_stars_accepted_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %}
+                    
+                    <tr><td class="tdbold">Số Ngôi sao hy vọng mỗi người được có: (để -1 nếu không giới hạn) </td><td><input name="group_nb_stars_{{i}}" type="number" value="{{result[1][i]['group_nb_stars']}}"></td><td></td><td></td></tr>
+                    <tr><td class="tdbold">Trả lời đúng sẽ cộng: </td><td><input name="group_bonus_{{i}}" type="number" value="{{result[1][i]['group_bonus']}}"> điểm, </td><td>sai bị trừ </td><td><input name="group_penalty_{{i}}" type="number" value="{{result[1][i]['group_penalty']}}"> điểm</td></tr> 
+
+                    {% if result[1][i]["group_lose_turn"] == 1 %}                    
+                        <tr><td class="tdbold">Trả lời sai sẽ mất lượt trong câu tiếp theo: </td><td><input type="radio" name="group_lose_turn_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_lose_turn_{{i}}" value=0>Không</td><td></td></tr>
+                    {% else %}
+                        <tr><td class="tdbold">Trả lời sai sẽ mất lượt trong câu tiếp theo: </td><td><input type="radio" name="group_lose_turn_{{i}}" value=1 >Có </td><td><input type="radio" name="group_lose_turn_{{i}}" value=0 checked>Không</td><td></td></tr>
+                    {% endif %}
+    
+                    {% if result[1][i]['group_stars_accepted'] == 1 %}
+                        <tr id="group_star_bonus_penalty_{{i}}"><td class="tdbold">Có ngôi sao hy vọng, trả lời đúng sẽ cộng: </td><td><input name="group_star_bonus_{{i}}" type="number" value="{{result[1][i]['group_star_bonus']}}"> điểm, sai bị trừ </td><td><input name="group_star_penalty_{{i}}" type="number" value="{{result[1][i]['group_star_penalty']}}"> điểm </td><td></td></tr>  
+                        {% if result[1][i]["group_lose_turn"] == 1 %}        
+                            <tr id="group_star_lose_turn_{{i}}"><td class="tdbold">Có ngôi sao hy vọng, trả lời sai bị mất lượt:  </td><td><input type="radio" name="group_star_lose_turn_{{i}}" value=1 checked>Có </td><td><input type="radio" name="group_star_lose_turn_{{i}}" value=0>Không</td><td></td></tr>    
+                        {% else %}
+                            <tr id="group_star_lose_turn_{{i}}"><td class="tdbold">Có ngôi sao hy vọng, trả lời sai bị mất lượt:  </td><td><input type="radio" name="group_star_lose_turn_{{i}}" value=1>Có </td><td><input type="radio" name="group_star_lose_turn_{{i}}" value=0 checked>Không</td><td></td></tr>    
+                        {% endif %}
+                    {% endif %}
+
+                </table>
+            {% endfor %} 
+
+            <div id="end_tab" style="display:none; "></div>
+
+            <p id='submit'><input type='submit' value='Send'></input></p>
             
         </form>     
     </body>

@@ -13,6 +13,7 @@
         <br>
         <form id="common_information" display="block" action = "send_meta" method = "POST">
             <h2>Thông tin chung</h2>
+            <p>Kí hiệu bộ câu hỏi (8 chữ cái tối đa, không có dấu cách): <input id="series" name="series" type="text" maxlength="8" size="10" > </p>
             <p>Số nhóm câu hỏi: <input id="nb_groups" name="nb_groups" type="number" min="1" max="10" value=0 onchange="createGroups(document.getElementById('nb_groups').value);"> </p>
 
             <h2>Bảng thông tin về các nhóm câu hỏi</h2>

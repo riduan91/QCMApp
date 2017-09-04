@@ -50,11 +50,12 @@ function createGroups(str_nb){
                 .append("<tr><td class='tdbold'>Thời gian suy nghĩ / tổng nhóm câu hỏi (để -1 nếu không giới hạn): </td><td><input name='group_group_duration_" + i + "' type='number' value='-1'> giây</td><td></td><td></td></tr>")
                 .append("<tr><td class='tdbold'>Thời gian giới hạn cho mỗi câu hỏi (để -1 nếu vô hạn): </td><td><input name='group_question_duration_" + i + "' type='number' value='-1'> giây</td><td></td><td></td></tr>")
                 .append("<tr><td class='tdbold'><h3 id='group_method_" + i + "'>Cách chơi: </h3></td><td></td><td></td><td></td></tr>")
-                .append("<tr><td class='tdbold'>Điểm chỉ được tính đến: </td><td><input type='radio' name='group_answer_mode_" + i + "' value=0>Người trả lời nhanh nhất </td><td><input type='radio' name='group_answer_mode_" + i + "' value=1 checked>Người trả lời đúng và nhanh nhất</td><td><input type='radio' name='group_answer_mode" + i + "' value=2>Tất cả</td></tr>")
+                .append("<tr><td class='tdbold'>Điểm chỉ được tính đến: </td><td><input type='radio' name='group_answer_mode_" + i + "' value=0>Người trả lời nhanh nhất </td><td><input type='radio' name='group_answer_mode_" + i + "' value=1 checked>Người trả lời đúng và nhanh nhất</td><td><input type='radio' name='group_answer_mode_" + i + "' value=2>Tất cả</td></tr>")
                 .append("<tr><td class='tdbold'>Có quyền chọn Ngôi sao hy vọng: </td><td><input type='radio' class='group_" + i + "' + name='group_stars_accepted_" + i + "' value=1>Có </td><td><input type='radio' name='group_stars_accepted_" + i + "' value=0 checked>Không</td><td></td></tr>")
                 .append("<tr><td class='tdbold'>Số Ngôi sao hy vọng mỗi người được có: (để -1 nếu không giới hạn) </td><td><input name='group_nb_stars_" + i + "' type='number' value=-1></td><td></td><td></td></tr>")
                 .append("<tr><td class='tdbold'>Trả lời đúng sẽ cộng: </td><td><input name='group_bonus_" + i + "' type='number' value=0> điểm, </td><td>sai bị trừ </td><td><input name='group_penalty_" + i + "' type='number' value=0> điểm</td></tr>")              
-                          
+                .append("<tr><td class='tdbold'>Trả lời sai sẽ mất lượt trong câu tiếp theo: </td><td><input type='radio' name='group_lose_turn_" + i + "' value=1 >Có </td><td><input type='radio' name='group_lose_turn_" + i + "' value=0 checked>Không</td><td></td></tr>")
+                                    
             $("input[name=question_type_" + i + "]").change(function(){
                 var ix = this.name.slice(14);
                 if (this.value == 1){
@@ -67,9 +68,12 @@ function createGroups(str_nb){
             $("input[name=group_stars_accepted_" + i + "]").change(function(){
                 var ix = this.name.slice(21);
                 if (this.value == 1){
-                    $("#tabcontent_group_" + ix).append("<tr id='group_star_bonus_penalty_" + ix + "'><td class='tdbold'>Có ngôi sao hy vọng, trả lời đúng sẽ cộng: </td><td><input name='group_star_bonus_" + ix + "' type='number' value=0> điểm, sai bị trừ </td><td><input name='group_star_penalty_" + ix + "' type='number' value=0> điểm </td><td></td></tr>")              
+                    $("#tabcontent_group_" + ix).append("<tr id='group_star_bonus_penalty_" + ix + "'><td class='tdbold'>Có ngôi sao hy vọng, trả lời đúng sẽ cộng: </td><td><input name='group_star_bonus_" + ix + "' type='number' value=0> điểm, sai bị trừ </td><td><input name='group_star_penalty_" + ix + "' type='number' value=0> điểm </td><td></td></tr>")  
+                    $("#tabcontent_group_" + ix).append("<tr id='group_star_lose_turn_" + ix + "'><td class='tdbold'>Có ngôi sao hy vọng, trả lời sai bị mất lượt:  </td><td><input type='radio' name='group_star_lose_turn_" + ix + "' value=1 >Có </td><td><input type='radio' name='group_star_lose_turn_" + ix + "' value=0 checked>Không</td><td></td></tr>")  
+                                
                 }  else {
                     $("#group_star_bonus_penalty_" + ix).remove();
+                    $("#group_star_lose_turn_" + ix).remove();
                 }          
             })            
         }
@@ -85,18 +89,3 @@ function createGroups(str_nb){
     }
 }
 
-function changeGroups(str_nb){
-    var nb = parseInt(str_nb);
-
-    if (nb >= 11){
-        nb = 10;    
-    }
-
-    for (var i = nb; i < 11; ++i){
-        if (document.getElementById("tablinks_group_" + i) != null)
-            $(".group_" + i).remove();
-    }
-
-    if (document.getElementById("submit") == null)
-        $("#common_information").append("<input id='submit' type='submit' value='Send'></input>")
-}

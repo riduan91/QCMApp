@@ -8,8 +8,14 @@
     </head>
     <body>
         <h1>Trang chủ</h1>
-        <p><button><a href="/new_meta">Bạn muốn nhập thông tin về nhóm câu hỏi cho một bộ câu hỏi mới</a></button></p>
-		<p><button><a href="/view_meta">Bạn muốn xem, sửa chữa thông tin cho 1 nhóm câu hỏi đã nhập</a></button></p>
-		<p><button><a href="/view_question">Bạn muốn xem, sửa chữa 1 bộ câu hỏi đã nhập</a></button></p>
+		<form action="/new_meta">
+			<input type="submit" value="Chuẩn bị một series mới" />
+		</form>
+		<form action="/view_general">
+			<input type="submit" value="Cập nhật một series cũ" />
+		</form>
+		<form action="/admin_start">
+			<input type="submit" value="Bắt đầu trò chơi" />
+		</form>
     </body>
 </html>

@@ -15,3 +15,4 @@ ALL = 2
 DBNAME = "QCM";
 GROUP_SUFFIX = "group";
 QUESTION_SUFFIX = "question";
+CURRENT = "Current";
