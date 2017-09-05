@@ -27,6 +27,7 @@ def send_meta():
     if request.method == 'POST':
         parameters = request.form
         Group.updateGroups(parameters)
+        parameters["series"] = parameters["series"].replace(" ", "_")
         res = Group.fetchGroups(parameters["series"])
         
         return render_template("admin_preparation_question.html", result = (len(res), res, parameters["series"]))
