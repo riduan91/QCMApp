@@ -58,12 +58,15 @@ def haveRightToAnswer(current, player_name):
     player = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX].find_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_answer" : 1})
     return Current.isActive(current) and player["G" + str(current["group"]) + "_active"] == 1 and player["G" + str(current["group"]) + "Q" + str(current["question"]) + "_answer"] == -1
     
-def answer(current, player_name, answer):
+def answer(current, player_name, answer, timestamp):
     if haveRightToAnswer(current, player_name):
         PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
+        QuestionCollection = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX]
+        question = QuestionCollection.find_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])})
         
-        beginning_timestamp = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX].update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"question_start_timestamp": 1}, upsert=True)["question_start_timestamp"]
+        beginning_timestamp = question["question_start_timestamp"]
         
-        PlayerCollection.update_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) : answer} }, upsert=True)
-        PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_nb_stars": -star_chosen} }, upsert=True)
-    
+        PlayerCollection.update_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_answer" : answer}, upsert=True)
+        PlayerCollection.update_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_time" : timestamp - beginning_timestamp}, upsert=True)
+        
+    if answer :
