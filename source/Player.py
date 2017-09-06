@@ -69,4 +69,3 @@ def answer(current, player_name, answer, timestamp):
         PlayerCollection.update_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_answer" : answer}, upsert=True)
         PlayerCollection.update_one({"_id": player_name}, {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_time" : timestamp - beginning_timestamp}, upsert=True)
         
-    if answer :
