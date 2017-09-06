@@ -6,6 +6,7 @@ Created on Fri Sep 01 18:31:23 2017
 """
 
 import Constants
+from Constants import convertInt
 
 from pymongo import MongoClient
 mongo_client = MongoClient('localhost', 27017)
@@ -48,7 +49,7 @@ def updateGroups(query):
         if (not "group_player_names_" + str(gr) in query.keys()):
             groups[gr]["group_player_names"] = []
         if (not "group_start_timestamp_" + str(gr) in query.keys()):
-            groups[gr]["group_start_timestamp"] = ""
+            groups[gr]["group_start_timestamp"] = 0
         
     for key, value in query.items():
         #parseData
@@ -71,67 +72,9 @@ def fetchGroups(series):
     GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
     return list(GroupCollection.find({}))
     
-def updateQuestions(series, query):    
-    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
-    
-    groups = fetchGroups(series)
-    
-    questions = []
-    nb_questions_in_collection = QuestionCollection.count()
-    
-    for gr in range(len(groups)):
-        questions.append([])
-        nb_questions = groups[gr]["group_nb_questions"]
-        for q in range(nb_questions):
-            questions[gr].append({})
-            questions[gr][q]["_id"] = "G" + str(gr) + "Q" + str(q) 
-    
-    
-    for key, value in query.items():
-        try:
-            last_ = key.rfind("_")
-            q = int(key[last_ + 1: ])
-            gr = int(key[last_ - 1])
-            questions[gr][q][key[: last_ - 2:]] = convertInt(value)
-        except:
-            pass
-    
-        
-    for gr in range(len(groups)):
-        for q in range(len(questions[gr])):
-            QuestionCollection.update_one({"_id": "G" + str(gr) + "Q" + str(q)}, {"$set": questions[gr][q]}, upsert=True)
-        
-        for q in range(len(questions[gr]), nb_questions_in_collection):
-            QuestionCollection.delete_one({"_id": "G" + str(gr) + "Q" + str(q)})
-         
-    return
+def fetchOneGroup(series, index):
+    GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
+    return GroupCollection.find_one({"_id": "G" + str(index)})
 
-def fetchQuestions(series):
-    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
-    
-    res_list = list(QuestionCollection.find({}))
-    groups = fetchGroups(series)
-    
-    questions = []
-    for gr in range(len(groups)):
-        questions.append([])
-        nb_questions = groups[gr]["group_nb_questions"]
-        for q in range(nb_questions):
-            questions[gr].append({})
-    
-    for item in res_list:
-        _id = item["_id"]
-        q = int(_id[3:])
-        gr = int(_id[1])
-        for key, value in item.items():
-            if (key != "_id"):
-                questions[gr][q][key] = value
-    
-    return questions       
-
-def convertInt(s):
-    try:
-        return int(s)
-    except ValueError:
-        return s
-
+def nextGroup(group_id):
+    return "G" + str(int(group_id[1]) + 1)

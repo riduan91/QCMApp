@@ -15,4 +15,19 @@ ALL = 2
 DBNAME = "QCM";
 GROUP_SUFFIX = "group";
 QUESTION_SUFFIX = "question";
+PLAYER_SUFFIX = "player";
 CURRENT = "Current";
+
+RESET = 0
+START_G = 1
+ACTIVE_Q = 2
+WAITING_Q = 3
+END_G = 4
+END = 5 
+
+
+def convertInt(s):
+    try:
+        return int(s)
+    except ValueError:
+        return s
