@@ -87,11 +87,14 @@ def admin_start():
     if request.method == 'POST':
         parameters = request.form
         series = parameters["series"]
-        series_list = Group.getSeries();
+        series_list = Group.getSeries()
         
         Current.updateCurrentSeriesName(series)
         Current.updateCurrentGroup(0)
         Current.updateCurrentPlayers(parameters["players"])
+        
+        groups = Group.fetchGroups(parameters["series"]) 
+        Current.updateCurrentNbGroups(len(groups))
         
         Player.updatePlayers(series, parameters["players"])
         
@@ -108,7 +111,16 @@ def admin_games():
     series = current["series"]
     group = Current.fetchCurrentGroup(current)
     question = Current.fetchCurrentQuestion(current)
-    return render_template("admin_games.html", result = (current, series, group, question))
+    players = Player.fetchAllPlayers(current)
+    ttmp = time.time()*1000
+    time_to_display = -1
+    if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
+        time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
+        if int(time_to_display) == 0:
+            Current.updateCurrentStatus(Constants.WAITING_Q)
+    if current["status"] == Constants.ACTIVE_Q and question["question_duration"] <= 0:
+        Current.updateCurrentStatus(Constants.WAITING_Q)
+    return render_template("admin_games.html", result = (current, series, group, question, players, 'ABCDEFGHIJKLM', time_to_display))
 
 @app.route("/admin_start_group", methods = ['GET', 'POST'])
 def admin_start_group():
@@ -130,8 +142,8 @@ def admin_start_question():
     # WAITING Q --> ACTIVE Q
     if request.method == "POST":
         parameters = request.form
-        question_index = parameters["next_question_index"]
-        Current.updateCurrentQuestion(int(question_index))
+        question_index = int(parameters["next_question_index"])
+        Current.updateCurrentQuestion(question_index)
         current = Current.fetchCurrent()
         timestamp = int(time.time()*1000) + 1000
         Current.updateQuestionTimestamp(current, timestamp)
@@ -161,6 +173,26 @@ def admin_end_group():
     else:
         return admin_games()
 
+@app.route("/admin_reset", methods = ['GET', 'POST'])
+def admin_reset():
+    if request.method == 'POST':
+        current = Current.fetchCurrent()
+        series = current["series"]
+        series_list = Group.getSeries()
+        players = ",".join(Current["players"])
+        Current.updateCurrentSeriesName(series)
+        Current.updateCurrentGroup(0)
+        Current.updateCurrentPlayers(players)
+        
+        Player.updatePlayers(series, players)
+        
+        current = Current.fetchCurrent()
+        return render_template("admin_start.html", result = (series_list, current))
+    else:
+        series_list = Group.getSeries();
+        current = Current.fetchCurrent()
+        return render_template("admin_start.html", result = (series_list, current))
+
 #---------------------ADMIN-START---------------------
 
 @app.route("/player_games", methods = ['GET', 'POST'])
@@ -172,9 +204,21 @@ def player_games():
         group = Current.fetchCurrentGroup(current)
         question = Current.fetchCurrentQuestion(current)
         player = Player.fetchPlayer(series, player_name)
-        return render_template("player_games.html", result = (current, series, group, question, player))
+        players = Player.fetchAllPlayers(current)
+        ttmp = time.time()*1000
+        time_to_display = -1
+        if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
+            time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
+        if len(player) > 0:
+            return render_template("player_games.html", result = (current, series, group, question, players, 'ABCDEFGHIJKLM', time_to_display, player))
+        else:
+            render_template("player_login.html", result = 1)
     else:
-        return render_template("player_login.html", result = (current, series, group, question, player))
+        return render_template("player_login.html", result = 1)
+
+@app.route("/player_login", methods = ['GET', 'POST'])
+def player_login():
+    return render_template("player_login.html", result = 1)
 
 @app.route("/player_choose_star", methods = ['GET', 'POST'])
 def player_choose_star():

@@ -40,6 +40,9 @@ def updateCurrentGroup(group):
 def updateCurrentQuestion(question):
     CurrentCollection.update_one({"_id": "current"}, {"$set": {"question": question}}, upsert=True)
 
+def updateCurrentNbGroups(nb):
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"nb_groups": nb}}, upsert=True)
+
 def activateQuestion(current):
     DB[current["series"] + "__" + Constants.QUESTION_SUFFIX].update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"$set": {"active": 1}}, upsert=True)
 
@@ -47,7 +50,7 @@ def deactivateQuestion(current):
     DB[current["series"] + "__" + Constants.QUESTION_SUFFIX].update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"$set": {"active": 0}}, upsert=True)
 
 def isActive(current):
-    active = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX].find_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"active": 1})
+    active = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX].find_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])})["active"]
     return active == 1
 
 def updateQuestionTimestamp(current, timestamp):

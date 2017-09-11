@@ -28,7 +28,9 @@ def updateQuestions(series, query):
         for q in range(nb_questions):
             questions[gr].append({})
             questions[gr][q]["_id"] = "G" + str(gr) + "Q" + str(q) 
-    
+            questions[gr][q]["question_answers_from_player"] = []
+            questions[gr][q]["question_times_from_player"] = []
+            questions[gr][q]["question_answered_players"] = []
     
     for key, value in query.items():
         try:

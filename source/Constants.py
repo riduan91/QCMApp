@@ -25,6 +25,8 @@ WAITING_Q = 3
 END_G = 4
 END = 5 
 
+NO_ANSWER = -2
+
 
 def convertInt(s):
     try:

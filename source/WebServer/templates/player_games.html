@@ -33,7 +33,9 @@
 			<tr>
 				<th>Tên</th>
 				<th>Thời gian</th>
-				<th>Đáp án</th>
+				{% if result[2]['group_see_other_answer'] == 0 %}
+					<th>Đáp án</th>
+				{% endif %}
 				<th>NSHV</th>
 				<th>Điểm</th>
 				<th>Tổng điểm</th>					
@@ -42,7 +44,9 @@
 				<tr>
 					<td>{{p["_id"]}}</td>
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]}}</td>
-					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]}}</td>
+					{% if result[2]['group_see_other_answer'] == 0 %}
+						<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]}}</td>
+					{% endif %}
 					<td>{{p["star_chosen"]}}</td>
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_point"]}}</td>
 					<td>{{p["point"]}}</td>				
@@ -57,34 +61,12 @@
 			{% if result[0]['status'] == 3 %}
 				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
 			{% elif result[0]['status'] == 2 and result[3]['question_duration'] > 0 %}
-				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}. Thời gian còn lại: {{ result[6] }} giây</h2>
-			{% elif result[0]['status'] == 2 %}
-				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
+				<h2>Thời gian còn lại: {{ result[6] }} giây</h2>
 			{% endif %}
 		</div>
 
 		<img src="static/A3.jpg" style="position:absolute; top:450px; left:60%; width:35%; height:100px; opacity:0.2;" />	
 		<div style="position:absolute; top:450px; left:60%; width:35%; height:100px; padding:20px;">		
-		{% if result[0]['status'] == 1%}
-			<form action="/admin_start_question" method = "POST">
-				<input type="number" name="next_question_index" value=0 style="display:none" />
-				<input type="submit" value="Bắt đầu câu hỏi số 1" />
-			</form> 
-		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 < result[2]['group_nb_questions']%}
-			<form action="/admin_start_question" method = "POST">
-				<input type="number" name="next_question_index" value={{result[0]['question'] + 1}} style="display:none" />
-				<input type="submit" value="Chuyển sang câu hỏi số {{result[0]['question'] + 2}}" />
-			</form> 
-		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 >= result[2]['group_nb_questions'] and result[0]['group'] + 1 >= result[0]['nb_groups'] %}
-			<form action="/admin_start_group" method = "GET">
-				<input type="submit" value="Kết thúc trò chơi" />
-			</form> 
-		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 >= result[2]['group_nb_questions']%}
-			<form action="/admin_start_group" method = "POST">
-				<input type="number" name="next_group_index" value={{result[0]['group'] + 1}} style="display:none" />
-				<input type="submit" value="Chuyển sang vòng {{result[0]['group'] + 2}}" />
-			</form> 
-		{% endif %}
 		</div>
 	</body>
 </html>

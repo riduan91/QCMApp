@@ -1,0 +1,33 @@
+<html>
+    <script>
+	var today = new Date();
+  	var expiry = new Date(today.getTime() + 30 * 24 * 3600 * 1000); // plus 30 days
+
+  	function setCookie(name, value)
+  	{
+    	document.cookie=name + "=" + escape(value) + "; path=/; expires=" + expiry.toGMTString();
+  	}
+
+  	function putCookie(form)
+                //this should set the UserName cookie to the proper value;
+  	{
+   		setCookie("player_name", form[0].player_name.value);
+		document.getElementById('Hello').innerHTML = "Click vào 'Bắt đầu' để bắt đầu trò chơi";
+    	return true;
+  	}
+
+  </script>
+<body>
+	<h1>Trắc nghiệm online</h1>
+	<p>Nhập tên/nickname mà bạn đã đăng kí với admin.</p>
+	<form>
+ 		<input type="text" value="" id="player_name" name='player_name'>
+ 		<input type="button" value="Đăng nhập" id="submit" onclick="putCookie(document.getElementsByTagName('form'));">
+	</form>
+	<p id='Hello'></p>
+	
+	<form action="/player_games" method = "POST">
+		<input type="submit" value="Bắt đầu" />
+	</form>
+</body>
+</html>      
