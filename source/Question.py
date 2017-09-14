@@ -9,12 +9,12 @@ import Constants, Group
 from Constants import convertInt
 
 from pymongo import MongoClient
-mongo_client = MongoClient('localhost', 27017)
 
-DB = mongo_client[Constants.DBNAME]
-CurrentCollection = DB[Constants.CURRENT]
 
-def updateQuestions(series, query):    
+def updateQuestions(series, query):   
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
     
     groups = Group.fetchGroups(series)
@@ -31,6 +31,8 @@ def updateQuestions(series, query):
             questions[gr][q]["question_answers_from_player"] = []
             questions[gr][q]["question_times_from_player"] = []
             questions[gr][q]["question_answered_players"] = []
+            questions[gr][q]["question_start_timestamp"] = -1
+            questions[gr][q]["active"] = 0
     
     for key, value in query.items():
         try:
@@ -48,10 +50,14 @@ def updateQuestions(series, query):
         
         for q in range(len(questions[gr]), nb_questions_in_collection):
             QuestionCollection.delete_one({"_id": "G" + str(gr) + "Q" + str(q)})
-         
+        
+    mongo_client.close()
     return
 
 def fetchQuestions(series):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
     
     res_list = list(QuestionCollection.find({}))
@@ -71,11 +77,17 @@ def fetchQuestions(series):
         for key, value in item.items():
             questions[gr][q][key] = value
     
+    mongo_client.close()
     return questions       
     
 def fetchOneQuestion(series, group, question):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
-    return QuestionCollection.find_one({"_id": "G" + str(group) + "Q" + str(question)})
+    rs = QuestionCollection.find_one({"_id": "G" + str(group) + "Q" + str(question)})
+    mongo_client.close()
+    return rs
 
 def nextQuestion(question_id):
     return question_id[:3] + str(int(question_id[3:]) + 1)

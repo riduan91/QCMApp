@@ -11,11 +11,7 @@ from pymongo import MongoClient
 mongo_client = MongoClient('localhost', 27017)
 
 DB = mongo_client[Constants.DBNAME]
-Group = DB[Constants.GROUP]
-
-def updatedb(query):
-    
-
+Group = DB[Constants.GROUP]    
 
 def chooseRandom(mylist, nb):
     random.shuffle(mylist)

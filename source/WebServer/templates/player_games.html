@@ -3,13 +3,14 @@
         <title>QCM</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta http-equiv="refresh" content="0.5; URL=/player_games">
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
     </head>
     <body>
 		
-		<img src="static/A0.jpg" style="position:absolute; width:55%; height:400px; opacity:0.2;" />
-		<div style="position:absolute; width:55%; height:400px; padding:10px">
+		<img src="static/A0.jpg" style="position:absolute; width:55%; height:500px; opacity:0.2;" />
+		<div style="position:absolute; width:55%; height:500px; padding:10px">
 			
 			<h1>Vòng {{result[0]['group'] + 1}}</h1>
 			{% if result[0]['status'] == 1 %}
@@ -19,14 +20,21 @@
 				
 				{% for i in range(result[2]["group_nb_options"])%}
 					<div>
-						<h4>{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}</h4>
+						<form action="/player_answer" method = "POST">
+							<input type="number" name="answer" value={{i}} style="display:none" />
+							{% if result[0]['status'] == 2 %}
+								<input type="submit" value="{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}">
+							{% else %}
+								<input type="submit" value="{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}" disabled>
+							{% endif %}
+						</form>
 					</div>
 				{% endfor %}
 			{% endif %}
 		</div>
 		
-		<img src="static/A1.jpg" style="position:absolute; left:60%; width:35%; height:400px; opacity:0.2;" />
-		<div style="position:absolute; left:60%; width:35%; height:400px; padding:10px;">
+		<img src="static/A1.jpg" style="position:absolute; left:60%; width:35%; height:500px; opacity:0.2;" />
+		<div style="position:absolute; left:60%; width:35%; height:500px; padding:10px;">
 			
 			<h2>Kết quả người chơi</h2>
 			<table>
@@ -45,7 +53,7 @@
 					<td>{{p["_id"]}}</td>
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]}}</td>
 					{% if result[2]['group_see_other_answer'] == 0 %}
-						<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]}}</td>
+						<td>{{ result[5][p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]] }}</td>
 					{% endif %}
 					<td>{{p["star_chosen"]}}</td>
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_point"]}}</td>
@@ -55,9 +63,8 @@
 			</table>
 		</div>
 		
-		<img src="static/A2.jpg" style="position:absolute; top:450px; width:55%; height:100px; opacity:0.2;" />
-		<div style="position:absolute; top:450px; width:55%; height:100px; padding:10px;">
-		{{result[3]['question_start_timestamp']}}
+		<img src="static/A2.jpg" style="position:absolute; top:550px; width:55%; height:100px; opacity:0.2;" />
+		<div style="position:absolute; top:550px; width:55%; height:100px; padding:10px;">
 			{% if result[0]['status'] == 3 %}
 				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
 			{% elif result[0]['status'] == 2 and result[3]['question_duration'] > 0 %}
@@ -65,8 +72,8 @@
 			{% endif %}
 		</div>
 
-		<img src="static/A3.jpg" style="position:absolute; top:450px; left:60%; width:35%; height:100px; opacity:0.2;" />	
-		<div style="position:absolute; top:450px; left:60%; width:35%; height:100px; padding:20px;">		
+		<img src="static/A3.jpg" style="position:absolute; top:550px; left:60%; width:35%; height:100px; opacity:0.2;" />	
+		<div style="position:absolute; top:550px; left:60%; width:35%; height:100px; padding:20px;">		
 		</div>
 	</body>
 </html>

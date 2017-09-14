@@ -26,6 +26,7 @@ END_G = 4
 END = 5 
 
 NO_ANSWER = -2
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVX'
 
 
 def convertInt(s):

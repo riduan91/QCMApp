@@ -9,21 +9,24 @@ import Constants
 from Constants import convertInt
 
 from pymongo import MongoClient
-mongo_client = MongoClient('localhost', 27017)
 
-DB = mongo_client[Constants.DBNAME]
-CurrentCollection = DB[Constants.CURRENT]
 
 def getSeries():
+    mongo_client = MongoClient('localhost', 27017)
+    DB = mongo_client[Constants.DBNAME]
     series_with_suffix = DB.collection_names()
     res = []
     for item in series_with_suffix:
         if ("__" + Constants.GROUP_SUFFIX in item):
             pos = item.index("__")
             res.append(item[:pos])
+    mongo_client.close()
     return res
 
 def updateGroups(query):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     
     series = query["series"];
     GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
@@ -65,16 +68,26 @@ def updateGroups(query):
     
     for gr in range(nb_groups, nb_groups_in_collection):
         GroupCollection.delete_one({"_id": "G" + str(gr)})
-    
+    mongo_client.close()
     return
 
 def fetchGroups(series):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
-    return list(GroupCollection.find({}))
+    rs = list(GroupCollection.find({}))
+    mongo_client.close()
+    return rs
     
 def fetchOneGroup(series, index):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
     GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
-    return GroupCollection.find_one({"_id": "G" + str(index)})
+    rs = GroupCollection.find_one({"_id": "G" + str(index)})
+    mongo_client.close()
+    return rs
 
 def nextGroup(group_id):
     return "G" + str(int(group_id[1]) + 1)

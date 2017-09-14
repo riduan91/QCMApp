@@ -120,7 +120,7 @@ def admin_games():
             Current.updateCurrentStatus(Constants.WAITING_Q)
     if current["status"] == Constants.ACTIVE_Q and question["question_duration"] <= 0:
         Current.updateCurrentStatus(Constants.WAITING_Q)
-    return render_template("admin_games.html", result = (current, series, group, question, players, 'ABCDEFGHIJKLM', time_to_display))
+    return render_template("admin_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display))
 
 @app.route("/admin_start_group", methods = ['GET', 'POST'])
 def admin_start_group():
@@ -210,7 +210,7 @@ def player_games():
         if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
             time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
         if len(player) > 0:
-            return render_template("player_games.html", result = (current, series, group, question, players, 'ABCDEFGHIJKLM', time_to_display, player))
+            return render_template("player_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display, player))
         else:
             render_template("player_login.html", result = 1)
     else:
@@ -228,9 +228,9 @@ def player_choose_star():
         star_chosen = int(parameters["start_chosen"])
         current = Current.fetchCurrent()
         Player.updateStarChosen(current, player_name, star_chosen)
-        return admin_games()
+        return player_games()
     else:
-        return admin_games()
+        return player_games()
 
 @app.route("/player_answer", methods = ['GET', 'POST'])
 def player_answer():
@@ -241,9 +241,9 @@ def player_answer():
         current = Current.fetchCurrent()
         timestamp = int(time.time()*1000)
         Player.answer(current, player_name, answer, timestamp)
-        return admin_games()
+        return player_games()
     else:
-        return admin_games()
+        return player_games()
 
 HOST = '0.0.0.0'
 PORT = 8803
