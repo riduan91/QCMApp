@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
+
     </head>
     <body>
         <h1>Chọn series câu hỏi mà bạn muốn xem hoặc sửa chữa</h1>
@@ -21,7 +22,8 @@
                 </form>
 				<form display="block" action = "delete_collection" method = "POST">
                     <input style="display:none" id="series" name="series" value={{s}}>
-                    <input type='submit' value='Xoá bộ câu hỏi'>
+					<button type="button" onclick="document.getElementById('deleter_{{s}}').style.display='block';">Xoá bộ câu hỏi</button>
+                    <input id='deleter_{{s}}' type='submit' value='Xác nhận xoá' style="display:none;">
                 </form>
             {%  endif %} 
         {% endfor %}    

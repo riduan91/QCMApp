@@ -19,7 +19,8 @@ def getSeries():
     for item in series_with_suffix:
         if ("__" + Constants.GROUP_SUFFIX in item):
             pos = item.index("__")
-            res.append(item[:pos])
+            if pos > 0:
+                res.append(item[:pos])
     mongo_client.close()
     return res
 

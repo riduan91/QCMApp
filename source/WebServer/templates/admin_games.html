@@ -3,6 +3,9 @@
         <title>QCM</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+		{% if result[0]['status'] == 1 %}
+			<meta http-equiv="refresh" content="0.9; URL=/player_games">
+		{% endif %}
 		<script type = "text/javascript" src = "{{ url_for('static', filename = 'live.js') }}" ></script>
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
