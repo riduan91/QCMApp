@@ -89,5 +89,13 @@ def fetchOneGroup(series, index):
     mongo_client.close()
     return rs
 
+def dropGroupCollection(series):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
+    GroupCollection = DB[series + "__" + Constants.GROUP_SUFFIX]
+    GroupCollection.drop()
+    mongo_client.close()
+
 def nextGroup(group_id):
     return "G" + str(int(group_id[1]) + 1)

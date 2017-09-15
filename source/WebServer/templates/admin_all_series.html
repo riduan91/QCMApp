@@ -19,7 +19,15 @@
                     <input style="display:none" id="series" name="series" value={{s}}>
                     <input type='submit' value='Xem câu hỏi'>
                 </form>
+				<form display="block" action = "delete_collection" method = "POST">
+                    <input style="display:none" id="series" name="series" value={{s}}>
+                    <input type='submit' value='Xoá bộ câu hỏi'>
+                </form>
             {%  endif %} 
         {% endfor %}    
+		
+		<form action="/">
+			<input type="submit" value="Quay lại trang chủ" />
+		</form>
     </body>
 </html>

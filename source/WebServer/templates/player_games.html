@@ -3,8 +3,9 @@
         <title>QCM</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta http-equiv="refresh" content="0.5; URL=/player_games">
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
+		<script type = "text/javascript" src = "{{ url_for('static', filename = 'live.js') }}" ></script>
+		<script type = "text/javascript" src = "{{ url_for('static', filename = 'countdown.js') }}" ></script>
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
     </head>
     <body>
@@ -22,7 +23,7 @@
 					<div>
 						<form action="/player_answer" method = "POST">
 							<input type="number" name="answer" value={{i}} style="display:none" />
-							{% if result[0]['status'] == 2 %}
+							{% if result[0]['status'] == 2 and result[7]["G" + result[0]['group']|string + "Q" + (result[0]['question'])|string + "_answer"] != -2%}
 								<input type="submit" value="{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}">
 							{% else %}
 								<input type="submit" value="{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}" disabled>
@@ -68,12 +69,27 @@
 			{% if result[0]['status'] == 3 %}
 				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
 			{% elif result[0]['status'] == 2 and result[3]['question_duration'] > 0 %}
-				<h2>Thời gian còn lại: {{ result[6] }} giây</h2>
+				<input id="beginning_time" value={{ result[6] }} style="display:none;">
+				<h2 id="time_to_display"></h2>
 			{% endif %}
 		</div>
 
-		<img src="static/A3.jpg" style="position:absolute; top:550px; left:60%; width:35%; height:100px; opacity:0.2;" />	
-		<div style="position:absolute; top:550px; left:60%; width:35%; height:100px; padding:20px;">		
+		<img src="static/A3.jpg" style="position:absolute; top:550px; left:60%; width:35%; height:100px; opacity:0.2;" />
+		<div style="position:absolute; top:550px; left:60%; width:35%; height:100px; padding:20px;">
+			{% if result[2]['group_stars_accepted'] == 1%}
+				{% if result[0]['status'] == 1 or (result[0]['status'] == 3 and result[7]['star_chosen'] == 0 and result[0]['question'] + 1 < result[2]['group_nb_questions'] and result[7]["G" + result[0]['group']|string + "Q" + (result[0]['question'] +1)|string + "_answer"] != -2) %}
+					<form action="/player_choose_star" method = "POST">
+						<input type="number" name="star_chosen" value=1 style="display:none">
+						<input type="submit" value="Chọn ngôi sao hy vọng ở câu tiếp">
+					</form>
+				{% elif result[0]['status'] == 3 and result[7]['star_chosen'] == 1 %}
+					<h2>Đã chọn ngôi sao hy vọng</h2>
+				{% endif %}
+			{% endif %}
+			
+			{% if result[0]['status'] == 3 and result[0]['question'] + 1 < result[2]['group_nb_questions'] and result[7]["G" + result[0]['group']|string + "Q" + (result[0]['question'] +1)|string + "_answer"] == -2 %}
+				<h2>Mất lượt ở câu sau</h2>
+			{% endif %}
 		</div>
 	</body>
 </html>

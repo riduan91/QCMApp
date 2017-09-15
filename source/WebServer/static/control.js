@@ -63,7 +63,7 @@ function createGroups(str_nb){
                 }  else {
                     $("#p_nb_options_" + ix).remove();
                 }          
-            })            
+            })          
 
             $("input[name=group_stars_accepted_" + i + "]").change(function(){
                 var ix = this.name.slice(21);

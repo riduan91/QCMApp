@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 SOURCE_DIR = "../"
@@ -79,6 +79,16 @@ def view_questions():
         questions = Question.fetchQuestions(parameters["series"])    
         return render_template("admin_question_information.html", result = (len(groups), groups, questions, parameters["series"]))
 
+@app.route("/delete_collection", methods = ['POST'])
+def delete_collection():
+    if request.method == 'POST':
+        parameters = request.form
+        current_series = parameters["series"]
+        Group.dropGroupCollection(current_series)
+        Question.dropQuestionCollection(current_series)
+        Player.dropPlayerCollection(current_series)
+        series = Group.getSeries()
+        return render_template("admin_all_series.html", result = series)
 
 #---------------------ADMIN-START---------------------
 
@@ -105,6 +115,7 @@ def admin_start():
         current = Current.fetchCurrent()
         return render_template("admin_start.html", result = (series_list, current))
 
+
 @app.route("/admin_game", methods = ['GET', 'POST'])
 def admin_games():
     current = Current.fetchCurrent()
@@ -112,6 +123,10 @@ def admin_games():
     group = Current.fetchCurrentGroup(current)
     question = Current.fetchCurrentQuestion(current)
     players = Player.fetchAllPlayers(current)
+    if current["status"] == Constants.START_G and current["group"] > 0 and group["group_nb_players_max"] > 0:
+        player_name_strings = ",".join([ players[i]["_id"] for i in range(len(players)) if i < group["group_nb_players_max"] ])
+    else:
+        player_name_strings = ",".join([ pl["_id"] for pl in players])
     ttmp = time.time()*1000
     time_to_display = -1
     if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
@@ -120,7 +135,7 @@ def admin_games():
             Current.updateCurrentStatus(Constants.WAITING_Q)
     if current["status"] == Constants.ACTIVE_Q and question["question_duration"] <= 0:
         Current.updateCurrentStatus(Constants.WAITING_Q)
-    return render_template("admin_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display))
+    return render_template("admin_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display, player_name_strings))
 
 @app.route("/admin_start_group", methods = ['GET', 'POST'])
 def admin_start_group():
@@ -132,9 +147,9 @@ def admin_start_group():
         Current.updateCurrentGroup(int(group_index))
         Current.updateCurrentQuestion(0)
         Current.updateCurrentStatus(Constants.START_G)
-        return admin_games()
+        return redirect(url_for('admin_games'))
     else:
-        return admin_games()
+        return redirect(url_for('admin_games'))
 
 @app.route("/admin_start_question", methods = ['GET', 'POST'])
 def admin_start_question():
@@ -145,33 +160,33 @@ def admin_start_question():
         question_index = int(parameters["next_question_index"])
         Current.updateCurrentQuestion(question_index)
         current = Current.fetchCurrent()
-        timestamp = int(time.time()*1000) + 1000
+        timestamp = int(time.time()*1000) + 2000
         Current.updateQuestionTimestamp(current, timestamp)
         Current.activateQuestion(current)
         if question_index == 0:
             Current.updateGroupTimestamp(current, timestamp)
         Current.updateCurrentStatus(Constants.ACTIVE_Q)
-        return admin_games()
+        return redirect(url_for('admin_games'))
     else:
-        return admin_games()
+        return redirect(url_for('admin_games'))
 
 @app.route("/admin_waiting_question", methods = ['GET', 'POST'])
 def admin_waiting_question():
     # ACTIVE Q --> WAITING Q
     if request.method == "POST":
         Current.updateCurrentStatus(Constants.WAITING_Q)
-        return admin_games()
+        return redirect(url_for('admin_games'))
     else:
-        return admin_games()
+        return redirect(url_for('admin_games'))
 
 @app.route("/admin_end_group", methods = ['GET', 'POST'])
 def admin_end_group():
     # ACTIVE Q --> WAITING Q
     if request.method == "POST":
         Current.updateCurrentStatus(Constants.END_G)
-        return admin_games()
+        return redirect(url_for('admin_games'))
     else:
-        return admin_games()
+        return redirect(url_for('admin_games'))
 
 @app.route("/admin_reset", methods = ['GET', 'POST'])
 def admin_reset():
@@ -192,6 +207,23 @@ def admin_reset():
         series_list = Group.getSeries();
         current = Current.fetchCurrent()
         return render_template("admin_start.html", result = (series_list, current))
+
+@app.route("/admin_partial_reset", methods = ['GET', 'POST'])
+def admin_partial_reset():
+    if request.method == 'POST':
+        current = Current.fetchCurrent()
+        current_players = current["players"]
+        
+        parameters = request.form
+        players = parameters["players"]
+        Current.updateCurrentPlayers(players)
+
+        Player.updatePartialPlayers(current, players, current_players)
+        
+        current = Current.fetchCurrent()
+        return redirect(url_for('admin_games'))
+    else:
+        return redirect(url_for('admin_games'))
 
 #---------------------ADMIN-START---------------------
 
@@ -225,28 +257,29 @@ def player_choose_star():
     if request.method == "POST":
         parameters = request.form
         player_name = request.cookies["player_name"]    
-        star_chosen = int(parameters["start_chosen"])
+        star_chosen = int(parameters["star_chosen"])
         current = Current.fetchCurrent()
         Player.updateStarChosen(current, player_name, star_chosen)
-        return player_games()
+        return redirect(url_for('player_games'))
     else:
-        return player_games()
+        return redirect(url_for('player_games'))
 
 @app.route("/player_answer", methods = ['GET', 'POST'])
 def player_answer():
     if request.method == "POST":
         parameters = request.form
-        player_name = request.cookies["player_name"]    
+        player_name = request.cookies["player_name"]
+        current = Current.fetchCurrent()
         answer = int(parameters["answer"])
         current = Current.fetchCurrent()
         timestamp = int(time.time()*1000)
         Player.answer(current, player_name, answer, timestamp)
-        return player_games()
+        return redirect(url_for('player_games'))
     else:
-        return player_games()
+        return redirect(url_for('player_games'))
 
 HOST = '0.0.0.0'
 PORT = 8803
 
 if __name__ == '__main__':
-    app.run(host = HOST, port = PORT , debug=True)
+    app.run(host = HOST, port = PORT , debug = True)

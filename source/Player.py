@@ -24,20 +24,23 @@ def fetchAllPlayers(current):
     DB = mongo_client[Constants.DBNAME]
     rs = list( DB[current["series"] + "__" + Constants.PLAYER_SUFFIX].find({"_id": {"$in" : current["players"] }}) )
     mongo_client.close()
+    rs = sorted(rs, key=lambda x: -x["point"])
     return rs
     
 def updatePlayers(series, player_names_str):
+    groups = Group.fetchGroups(series)
+    questions = Question.fetchQuestions(series)
     mongo_client = MongoClient('localhost', 27017)
-
     DB = mongo_client[Constants.DBNAME]
     PlayerCollection = DB[series + "__" + Constants.PLAYER_SUFFIX]
     
+    PlayerCollection.drop()
+    
     player_names_str = player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
     player_names = player_names_str.split(",")
-    mongo_client.close()
+    
     players = {}
-    groups = Group.fetchGroups(series)
-    questions = Question.fetchQuestions(series)
+
     for player in player_names:
         players[player] = {}
         players[player]["_id"] = player
@@ -57,7 +60,44 @@ def updatePlayers(series, player_names_str):
     
     for pl in players.keys():
         PlayerCollection.update_one({"_id": players[pl]["_id"]}, {"$set": players[pl]}, upsert=True)
+        
+    mongo_client.close()
+
+def dropPlayerCollection(series):
+    mongo_client = MongoClient('localhost', 27017)
+    DB = mongo_client[Constants.DBNAME]
+    PlayerCollection = DB[series + "__" + Constants.PLAYER_SUFFIX]
     
+    PlayerCollection.drop()
+    mongo_client.close()
+    
+def updatePartialPlayers(current, player_names_str, old_player_names_str):
+    groups = Group.fetchGroups(current["series"])
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
+    PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
+    
+    player_names_str = player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
+    player_names = player_names_str.split(",")
+    old_player_names_str = old_player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
+    old_player_names = old_player_names_str.split(",")
+    players = {}
+
+    for player in old_player_names:
+        players[player] = {}
+        players[player]["star_chosen"] = 0
+        if player in player_names:
+            players[player]["G" + str(current["group"]) + "_active"] = 1
+        else:
+            players[player]["G" + str(current["group"]) + "_active"] = 0
+            players[player]["G" + str(current["group"]) + "_nb_stars"] = groups[current["group"]]["group_nb_stars"]
+    
+    for pl in players.keys():
+        PlayerCollection.update_one({"_id": players[pl]["_id"]}, {"$set": players[pl]}, upsert=True)
+    
+    mongo_client.close()
+
 
 def updateAnswer(current, player_name, answer):
     mongo_client = MongoClient('localhost', 27017)
@@ -105,7 +145,7 @@ def haveRightToAnswer(current, player_name):
             return False
     if group["group_answer_mode"] == 1:
         current_answers = question["question_answers_from_player"]
-        if question["question_answer"] in current_answers:
+        if "question_answer" in question.keys() and question["question_answer"] in current_answers:
             return False
     return True
    
@@ -114,34 +154,36 @@ def loseTurnInNextQuestion(DB, current, player_name):
     PlayerCollection.update_one({"_id": player_name}, {"$set": {"G" + str(current["group"]) + "Q" + str(current["question"] + 1) + "_answer" : Constants.NO_ANSWER}}, upsert=True)
    
 def answer(current, player_name, answer, timestamp):
+    hRTA = haveRightToAnswer(current, player_name)
+    mongo_client = MongoClient('localhost', 27017)
 
-    if haveRightToAnswer(current, player_name):
-        mongo_client = MongoClient('localhost', 27017)
+    DB = mongo_client[Constants.DBNAME]
+    GroupCollection = DB[current["series"] + "__" + Constants.GROUP_SUFFIX]
+    QuestionCollection = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX]
+    question = QuestionCollection.find_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])})
+    beginning_timestamp = question["question_start_timestamp"]
+    current_answers = question["question_answers_from_player"] + [answer]
+    current_times = question["question_times_from_player"] + [round((timestamp - question["question_start_timestamp"])/1000., 2)]
+    answered_players = question["question_answered_players"] + [player_name]
+    QuestionCollection.update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"$set": {"question_answers_from_player": current_answers, "question_times_from_player": current_times, "question_answered_players": answered_players}}, upsert=True)
+    updateStarChosen(current, player_name, 0)
 
-        DB = mongo_client[Constants.DBNAME]
-        PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
-        GroupCollection = DB[current["series"] + "__" + Constants.GROUP_SUFFIX]
-        QuestionCollection = DB[current["series"] + "__" + Constants.QUESTION_SUFFIX]
-        question = QuestionCollection.find_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])})
-        player = PlayerCollection.find_one({"_id": player_name})
-        group = GroupCollection.find_one({"_id": "G" + str(current["group"])})
-        beginning_timestamp = question["question_start_timestamp"]
-        current_answers = question["question_answers_from_player"] + [answer]
-        current_times = question["question_times_from_player"] + [round((timestamp - question["question_start_timestamp"])/1000., 2)]
-        #current_times = []
-        answered_players = question["question_answered_players"] + [player_name]
-        #answered_players = []
-        QuestionCollection.update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"$set": {"question_answers_from_player": current_answers, "question_times_from_player": current_times, "question_answered_players": answered_players}}, upsert=True)
-        mongo_client.close()
-        updateAnswer(current, player_name, answer)
-        updateTime(current, player_name, timestamp, beginning_timestamp) 
+
+    PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
+
+    player = PlayerCollection.find_one({"_id": player_name})
+    group = GroupCollection.find_one({"_id": "G" + str(current["group"])})
+    mongo_client.close()
+    updateAnswer(current, player_name, answer)
+    updateTime(current, player_name, timestamp, beginning_timestamp) 
         
-        if group["group_answer_mode"] == 0:
-            Current.updateCurrentStatus(Constants.WAITING_Q)
+    if group["group_answer_mode"] == 0:
+        Current.updateCurrentStatus(Constants.WAITING_Q)
             
-        elif group["group_answer_mode"] == 1 and answer == question["question_answer"]:
-            Current.updateCurrentStatus(Constants.WAITING_Q)
-      
+    elif group["group_answer_mode"] == 1 and answer == question["question_answer"]:
+        Current.updateCurrentStatus(Constants.WAITING_Q)
+    
+    if hRTA:  
         mongo_client = MongoClient('localhost', 27017)
 
         DB = mongo_client[Constants.DBNAME]
@@ -165,5 +207,3 @@ def answer(current, player_name, answer, timestamp):
                 if group["group_lose_turn"] == 1:
                     loseTurnInNextQuestion(DB, current, player_name)
         mongo_client.close()
-    
-        updateStarChosen(current, player_name, 0)

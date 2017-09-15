@@ -88,6 +88,14 @@ def fetchOneQuestion(series, group, question):
     rs = QuestionCollection.find_one({"_id": "G" + str(group) + "Q" + str(question)})
     mongo_client.close()
     return rs
+    
+def dropQuestionCollection(series):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
+    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
+    QuestionCollection.drop()
+    mongo_client.close()
 
 def nextQuestion(question_id):
     return question_id[:3] + str(int(question_id[3:]) + 1)

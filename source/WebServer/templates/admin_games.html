@@ -3,9 +3,7 @@
         <title>QCM</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-		{% if result[0]['status'] == 2%}
-			<meta http-equiv="refresh" content="0.5; URL=/admin_game">
-		{% endif %}
+		<script type = "text/javascript" src = "{{ url_for('static', filename = 'live.js') }}" ></script>
         <link rel="stylesheet" href = "{{ url_for('static', filename = 'main.css') }}" />
         <script type = "text/javascript" src = "{{ url_for('static', filename = 'jquery.js') }}" ></script>
     </head>
@@ -15,8 +13,12 @@
 		<div style="position:absolute; width:55%; height:400px; padding:10px">
 			
 			<h1>Vòng {{result[0]['group'] + 1}}</h1>
-			{% if result[0]['status'] == 1 %}
+			{% if result[0]['status'] == 1 and result[0]['group'] > 0 %}
 				<h2>Thể lệ chung</h2>
+				<form action="/admin_partial_reset" method = "POST">
+					<p>Những người chơi vòng này: <input type="text" name="players" value="{{result[7]}}" style="" /></p>
+					<input type="submit" value="Cập nhật người chơi" />
+				</form> 
 			{% elif result[0]['status'] == 2 or result[0]['status'] == 3 %}
 				<h2>Câu hỏi {{result[0]['question'] + 1}}: {{result[3]['question_content']}}</h2>
 				
@@ -25,6 +27,7 @@
 						<h4>{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}</h4>
 					</div>
 				{% endfor %}
+
 			{% endif %}
 		</div>
 		
@@ -72,7 +75,7 @@
 				<input type="number" name="next_question_index" value=0 style="display:none" />
 				<input type="submit" value="Bắt đầu câu hỏi số 1" />
 			</form> 
-		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 < result[2]['group_nb_questions']%}
+		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 < result[2]['group_nb_questions'] %}
 			<form action="/admin_start_question" method = "POST">
 				<input type="number" name="next_question_index" value={{result[0]['question'] + 1}} style="display:none" />
 				<input type="submit" value="Chuyển sang câu hỏi số {{result[0]['question'] + 2}}" />
