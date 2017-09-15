@@ -107,6 +107,7 @@ def admin_start():
         Current.updateCurrentNbGroups(len(groups))
         
         Player.updatePlayers(series, parameters["players"])
+        Question.resetArrays(series)
         
         current = Current.fetchCurrent()
         return render_template("admin_start.html", result = (series_list, current))
@@ -188,6 +189,15 @@ def admin_end_group():
     else:
         return redirect(url_for('admin_games'))
 
+@app.route("/admin_end", methods = ['GET', 'POST'])
+def admin_end():
+    # ACTIVE Q --> WAITING Q
+    if request.method == "POST":
+        Current.updateCurrentStatus(Constants.END)
+        return redirect(url_for('admin_games'))
+    else:
+        return redirect(url_for('admin_games'))
+
 @app.route("/admin_reset", methods = ['GET', 'POST'])
 def admin_reset():
     if request.method == 'POST':
@@ -200,6 +210,7 @@ def admin_reset():
         Current.updateCurrentPlayers(players)
         
         Player.updatePlayers(series, players)
+        Question.resetArrays(series)
         
         current = Current.fetchCurrent()
         return render_template("admin_start.html", result = (series_list, current))

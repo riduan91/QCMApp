@@ -166,7 +166,6 @@ def answer(current, player_name, answer, timestamp):
     current_times = question["question_times_from_player"] + [round((timestamp - question["question_start_timestamp"])/1000., 2)]
     answered_players = question["question_answered_players"] + [player_name]
     QuestionCollection.update_one({"_id": "G" + str(current["group"]) + "Q" + str(current["question"])}, {"$set": {"question_answers_from_player": current_answers, "question_times_from_player": current_times, "question_answered_players": answered_players}}, upsert=True)
-    updateStarChosen(current, player_name, 0)
 
 
     PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
@@ -189,21 +188,27 @@ def answer(current, player_name, answer, timestamp):
         DB = mongo_client[Constants.DBNAME]
         if answer == question["question_answer"]:
             if player["star_chosen"] == 1:
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_point": question["question_star_bonus"]} }, upsert=True)
                 PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": question["question_star_bonus"]} }, upsert=True)
                 PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": question["question_star_bonus"]} }, upsert=True)
             else:
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_point": question["question_bonus"]} }, upsert=True)
                 PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": question["question_bonus"]} }, upsert=True)
                 PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": question["question_bonus"]} }, upsert=True)
     
         else:
             if player["star_chosen"] == 1:
-                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": question["question_star_bonus"]} }, upsert=True)
-                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": question["question_star_bonus"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_point": 0 - question["question_star_penalty"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": 0 - question["question_star_penalty"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": 0 - question["question_star_penalty"]} }, upsert=True)
                 if group["group_star_lose_turn"] == 1 or group["group_lose_turn"] == 1:
                     loseTurnInNextQuestion(DB, current, player_name)
             else:
-                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": question["question_bonus"]} }, upsert=True)
-                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": question["question_bonus"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "Q" + str(current["question"]) + "_point": 0 - question["question_penalty"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"G" + str(current["group"]) + "_point": 0 - question["question_penalty"]} }, upsert=True)
+                PlayerCollection.update_one({"_id": player_name}, {"$inc": {"point": 0 - question["question_penalty"]} }, upsert=True)
                 if group["group_lose_turn"] == 1:
                     loseTurnInNextQuestion(DB, current, player_name)
         mongo_client.close()
+        
+    updateStarChosen(current, player_name, 0)

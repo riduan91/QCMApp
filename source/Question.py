@@ -54,6 +54,35 @@ def updateQuestions(series, query):
     mongo_client.close()
     return
 
+def resetArrays(series):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
+    QuestionCollection = DB[series + "__" + Constants.QUESTION_SUFFIX]
+    
+    groups = Group.fetchGroups(series)
+    
+    questions = []
+    
+    for gr in range(len(groups)):
+        questions.append([])
+        nb_questions = groups[gr]["group_nb_questions"]
+        for q in range(nb_questions):
+            questions[gr].append({})
+            questions[gr][q]["_id"] = "G" + str(gr) + "Q" + str(q) 
+            questions[gr][q]["question_answers_from_player"] = []
+            questions[gr][q]["question_times_from_player"] = []
+            questions[gr][q]["question_answered_players"] = []
+            questions[gr][q]["question_start_timestamp"] = -1
+            questions[gr][q]["active"] = 0
+    
+    for gr in range(len(groups)):
+        for q in range(len(questions[gr])):
+            QuestionCollection.update_one({"_id": "G" + str(gr) + "Q" + str(q)}, {"$set": questions[gr][q]}, upsert=True)    
+    
+    mongo_client.close()
+    return
+
 def fetchQuestions(series):
     mongo_client = MongoClient('localhost', 27017)
 

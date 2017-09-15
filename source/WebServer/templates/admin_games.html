@@ -3,7 +3,7 @@
         <title>QCM</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-		{% if result[0]['status'] == 1 %}
+		{% if result[0]['status'] == 2 %}
 			<meta http-equiv="refresh" content="0.9; URL=/admin_game">
 		{% endif %}
 		<script type = "text/javascript" src = "{{ url_for('static', filename = 'live.js') }}" ></script>
@@ -18,6 +18,45 @@
 			<h1>Vòng {{result[0]['group'] + 1}}</h1>
 			{% if result[0]['status'] == 1 and result[0]['group'] > 0 %}
 				<h2>Thể lệ chung</h2>
+				<h5>
+					Có {{ result[2]["group_nb_questions"] }} câu hỏi.<br/>
+					{% if result[2]["group_question_type"] == 1 %}
+						Mỗi câu hỏi ở dạng trắc nghiệm, với {{ result[2]["group_nb_options"] }} phương án lựa chọn với 1 phương án đúng.<br/>
+					{% else %}
+						Mỗi câu hỏi ở dạng tự luận.<br/>
+					{% endif %}
+					
+					{% if result[2]["group_question_duration"] > 0%}
+						Bạn có {{ result[2]["group_question_duration"] }} giây suy nghĩ cho mỗi câu hỏi.<br/>
+					{% endif %}
+					
+					{% if result[2]["group_answer_mode"] == 0 %}
+						Chỉ người trả lời nhanh nhất là được tính câu trả lời.<br/>
+					{% elif result[2]["group_answer_mode"] == 1 %}
+						Chỉ người trả lời đúng và nhanh nhất là có điểm.<br/>
+					{% endif %}
+					
+					Nếu trả lời đúng, bạn được cộng {{ result[2]["group_bonus"] }} điểm, sai bị trừ {{ result[2]["group_penalty"] }} điểm.
+					{% if result[2]["group_lose_turn"] == 1%}
+						Và nếu sai bạn bị mất quyền trả lời ở câu hỏi tiếp theo.
+					{% endif %}
+					<br/>
+					
+					{% if result[2]["group_stars_accepted"] == 1%}
+						Bạn cũng có quyền được chọn ngôi sao hy vọng trước mỗi câu hỏi.
+						{% if result[2]["group_nb_stars"] > 0%}
+						Nhưng bạn chỉ có {{result[2]["group_nb_stars"]}} ngôi sao trong cả vòng thi.
+						{% endif %}
+						
+						Nếu chọn ngôi sao hy vọng, trả lời đúng, bạn được cộng {{ result[2]["group_star_bonus"] }} điểm, sai bị trừ {{ result[2]["group_star_penalty"] }} điểm.
+						{% if result[2]["group_star_lose_turn"] == 1%}
+							Và nếu sai bạn bị mất quyền trả lời ở câu hỏi tiếp theo.
+						{% endif %}
+						
+					{% endif %}
+					<br/>
+				</h5>
+				
 				<form action="/admin_partial_reset" method = "POST">
 					<p>Những người chơi vòng này: <input type="text" name="players" value="{{result[7]}}" style="" /></p>
 					<input type="submit" value="Cập nhật người chơi" />
@@ -30,7 +69,8 @@
 						<h4>{{result[5][i]}}. &nbsp &nbsp {{result[3]['question_option_' + i|string ]}}</h4>
 					</div>
 				{% endfor %}
-
+			{% elif result[0]['status'] == 5%}
+				<h1>Trò chơi kết thúc.</h1>
 			{% endif %}
 		</div>
 		
@@ -84,7 +124,7 @@
 				<input type="submit" value="Chuyển sang câu hỏi số {{result[0]['question'] + 2}}" />
 			</form> 
 		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 >= result[2]['group_nb_questions'] and result[0]['group'] + 1 >= result[0]['nb_groups'] %}
-			<form action="/admin_start_group" method = "GET">
+			<form action="/admin_end" method = "GET">
 				<input type="submit" value="Kết thúc trò chơi" />
 			</form> 
 		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 >= result[2]['group_nb_questions']%}
