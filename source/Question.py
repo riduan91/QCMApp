@@ -104,7 +104,8 @@ def fetchQuestions(series):
         q = int(_id[3:])
         gr = int(_id[1])
         for key, value in item.items():
-            questions[gr][q][key] = value
+            if q < groups[gr]["group_nb_questions"]:
+                questions[gr][q][key] = value
     
     mongo_client.close()
     return questions       
