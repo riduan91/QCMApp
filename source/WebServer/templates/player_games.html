@@ -93,7 +93,11 @@
 			{% for p in result[4] %}
 				<tr>
 					<td>{{p["_id"]}}</td>
-					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]}}</td>
+					{% if p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"] > 0 %}
+						<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]|round(2)}} s</td>
+					{% else %}
+						<td>Chưa trả lời</td>
+					{% endif %}
 					{% if result[2]['group_see_other_answer'] == 1 %}
 						<td>{{ result[5][p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]] }}</td>
 					{% endif %}
@@ -129,12 +133,12 @@
 		<img src="static/A3.jpg" style="position:absolute; top:550px; left:60%; width:35%; height:100px; opacity:0.2;" />
 		<div style="position:absolute; top:550px; left:60%; width:35%; height:100px; padding:20px;">
 			{% if result[2]['group_stars_accepted'] == 1%}
-				{% if result[0]['status'] == 1 or (result[0]['status'] == 3 and result[7]['star_chosen'] == 0 and result[0]['question'] + 1 < result[2]['group_nb_questions'] and result[7]["G" + result[0]['group']|string + "Q" + (result[0]['question'] +1)|string + "_answer"] != -2) and result[7]["G" + result[0]['group']|string + "_nb_stars"] != 0 %}
+				{% if (result[0]['status'] == 1 or result[0]['status'] == 3) and result[7]['star_chosen'] == 0 and result[0]['question'] + 1 < result[2]['group_nb_questions'] and result[7]["G" + result[0]['group']|string + "Q" + (result[0]['question'] +1)|string + "_answer"] != -2 and result[7]["G" + result[0]['group']|string + "_nb_stars"] != 0 %}
 					<form action="/player_choose_star" method = "POST">
 						<input type="number" name="star_chosen" value=1 style="display:none">
 						<input type="submit" value="Chọn ngôi sao hy vọng ở câu tiếp">
 					</form>
-				{% elif result[0]['status'] == 3 and result[7]['star_chosen'] == 1 %}
+				{% elif (result[0]['status'] == 1 or result[0]['status'] == 3) and result[7]['star_chosen'] == 1 %}
 					<h2>Đã chọn ngôi sao hy vọng</h2>
 				{% endif %}
 			{% endif %}

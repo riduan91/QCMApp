@@ -136,6 +136,28 @@ def admin_games():
             Current.updateCurrentStatus(Constants.WAITING_Q)
     if current["status"] == Constants.ACTIVE_Q and question["question_duration"] <= 0:
         Current.updateCurrentStatus(Constants.WAITING_Q)
+
+    if current["status"] == Constants.WAITING_Q and group["group_next_question_on"] == 1:
+        time.sleep(5000)
+        if current["question"] + 1 >= group["group_nb_questions"]:
+            if current["group"] + 1 >= current["nb_groups"]:
+                Current.updateCurrentStatus(Constants.END)
+            else:
+                group_index = current["group"] + 1
+                Current.updateCurrentGroup(int(group_index))
+                Current.updateCurrentQuestion(0)
+                Current.updateCurrentStatus(Constants.START_G)
+        else:
+            question_index = current["question"] + 1
+            Current.updateCurrentQuestion(question_index)
+            current = Current.fetchCurrent()
+            timestamp = int(time.time()*1000) + 2000
+            Current.updateQuestionTimestamp(current, timestamp)
+            Current.activateQuestion(current)
+            if question_index == 0:
+                Current.updateGroupTimestamp(current, timestamp)
+            Current.updateCurrentStatus(Constants.ACTIVE_Q)
+    
     return render_template("admin_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display, player_name_strings))
 
 @app.route("/admin_start_group", methods = ['GET', 'POST'])
@@ -252,7 +274,7 @@ def player_games():
         time_to_display = -1
         if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
             time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
-        if len(player) > 0:
+        if type(player) != None:
             return render_template("player_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display, player))
         else:
             render_template("player_login.html", result = 1)

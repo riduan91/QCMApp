@@ -71,7 +71,7 @@ def dropPlayerCollection(series):
     PlayerCollection.drop()
     mongo_client.close()
     
-def updatePartialPlayers(current, player_names_str, old_player_names_str):
+def updatePartialPlayers(current, player_names_str, old_player_names):
     groups = Group.fetchGroups(current["series"])
     mongo_client = MongoClient('localhost', 27017)
 
@@ -80,12 +80,11 @@ def updatePartialPlayers(current, player_names_str, old_player_names_str):
     
     player_names_str = player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
     player_names = player_names_str.split(",")
-    old_player_names_str = old_player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
-    old_player_names = old_player_names_str.split(",")
     players = {}
 
     for player in old_player_names:
         players[player] = {}
+        players[player]["_id"] = player
         players[player]["star_chosen"] = 0
         if player in player_names:
             players[player]["G" + str(current["group"]) + "_active"] = 1

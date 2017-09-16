@@ -12,11 +12,11 @@
     </head>
     <body>
 		
-		<img src="static/A0.jpg" style="position:absolute; width:55%; height:400px; opacity:0.2;" />
-		<div style="position:absolute; width:55%; height:400px; padding:10px">
+		<img src="static/A0.jpg" style="position:absolute; width:55%; height:500px; opacity:0.2;" />
+		<div style="position:absolute; width:55%; height:500px; padding:10px">
 			
 			<h1>Vòng {{result[0]['group'] + 1}}</h1>
-			{% if result[0]['status'] == 1 and result[0]['group'] > 0 %}
+			{% if result[0]['status'] == 1 %}
 				<h2>Thể lệ chung</h2>
 				<h5>
 					Có {{ result[2]["group_nb_questions"] }} câu hỏi.<br/>
@@ -56,7 +56,8 @@
 					{% endif %}
 					<br/>
 				</h5>
-				
+			{% endif %}
+			{% if result[0]['status'] == 1 and result[0]['group'] > 0 %}
 				<form action="/admin_partial_reset" method = "POST">
 					<p>Những người chơi vòng này: <input type="text" name="players" value="{{result[7]}}" style="" /></p>
 					<input type="submit" value="Cập nhật người chơi" />
@@ -74,8 +75,8 @@
 			{% endif %}
 		</div>
 		
-		<img src="static/A1.jpg" style="position:absolute; left:60%; width:35%; height:400px; opacity:0.2;" />
-		<div style="position:absolute; left:60%; width:35%; height:400px; padding:10px;">
+		<img src="static/A1.jpg" style="position:absolute; left:60%; width:35%; height:500px; opacity:0.2;" />
+		<div style="position:absolute; left:60%; width:35%; height:500px; padding:10px;">
 			
 			<h2>Kết quả người chơi</h2>
 			<table>
@@ -90,7 +91,11 @@
 			{% for p in result[4] %}
 				<tr>
 					<td>{{p["_id"]}}</td>
-					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]}}</td>
+					{% if p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"] > 0 %}
+						<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_time"]|round(2)}} s</td>
+					{% else %}
+						<td>Chưa trả lời</td>
+					{% endif %}
 					<td>{{result[5][p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_answer"]]}}</td>
 					<td>{{p["star_chosen"]}}</td>
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_point"]}}</td>
@@ -100,8 +105,8 @@
 			</table>
 		</div>
 		
-		<img src="static/A2.jpg" style="position:absolute; top:450px; width:55%; height:100px; opacity:0.2;" />
-		<div style="position:absolute; top:450px; width:55%; height:100px; padding:10px;">
+		<img src="static/A2.jpg" style="position:absolute; top:550px; width:55%; height:100px; opacity:0.2;" />
+		<div style="position:absolute; top:550px; width:55%; height:100px; padding:10px;">
 			{% if result[0]['status'] == 3 %}
 				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
 			{% elif result[0]['status'] == 2 and result[3]['question_duration'] > 0 %}
@@ -111,8 +116,8 @@
 			{% endif %}
 		</div>
 
-		<img src="static/A3.jpg" style="position:absolute; top:450px; left:60%; width:35%; height:100px; opacity:0.2;" />	
-		<div style="position:absolute; top:450px; left:60%; width:35%; height:100px; padding:20px;">		
+		<img src="static/A3.jpg" style="position:absolute; top:550px; left:60%; width:35%; height:100px; opacity:0.2;" />	
+		<div style="position:absolute; top:550px; left:60%; width:35%; height:100px; padding:20px;">		
 		{% if result[0]['status'] == 1%}
 			<form action="/admin_start_question" method = "POST">
 				<input type="number" name="next_question_index" value=0 style="display:none" />
