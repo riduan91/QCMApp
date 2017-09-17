@@ -12,13 +12,10 @@ import time
 
 #############INDEX######################
 
-@app.route("/player")
+@app.route("/")
 def index():
-    return render_template("player_login.html")
-
-@app.route("/admin")
-def admin():
-    return render_template("index.html")    
+    return render_template("index.html")
+    
 
 #---------------------PREPARATION-META---------------------
 
@@ -318,4 +315,4 @@ HOST = '0.0.0.0'
 PORT = 8803
 
 if __name__ == '__main__':
-    app.run(host = HOST, port = PORT , debug = True)
+    app.run(host = HOST, port = PORT , debug = True, threaded = True)
