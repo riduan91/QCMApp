@@ -14,8 +14,11 @@ import time
 
 @app.route("/")
 def index():
-    return render_template("index.html")
-    
+    return render_template("player_login.html")
+
+@app.route("/admin")
+def admin_home():
+    return render_template("index.html") 
 
 #---------------------PREPARATION-META---------------------
 
