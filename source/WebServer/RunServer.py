@@ -12,7 +12,7 @@ import time
 
 #############INDEX######################
 
-@app.route("/")
+@app.route("/player")
 def index():
     return render_template("player_login.html")
 
