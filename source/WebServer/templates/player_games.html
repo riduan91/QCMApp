@@ -112,7 +112,7 @@
 		
 		<img src="static/A2.jpg" style="position:absolute; top:550px; width:55%; height:100px; opacity:0.2;" />
 		<div style="position:absolute; top:550px; width:55%; height:100px; padding:10px;">
-			{% if result[0]['status'] == 3 %}
+			{% if result[0]['status'] == 3 and result[2]['group_see_correct_answer'] == 1 %}
 				<h2>Đáp án: &nbsp &nbsp {{result[5][result[3]['question_answer']]}}.</h2>
 			{% elif result[0]['status'] == 2 and result[3]['question_duration'] > 0 %}
 				<input id="beginning_time" value={{ result[6] }} style="display:none;">
