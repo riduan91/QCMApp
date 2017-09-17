@@ -141,7 +141,7 @@ def admin_games():
         Current.updateCurrentStatus(Constants.WAITING_Q)
 
     if current["status"] == Constants.WAITING_Q and group["group_next_question_on"] == 1:
-        time.sleep(5000)
+        time.sleep(5)
         if current["question"] + 1 >= group["group_nb_questions"]:
             if current["group"] + 1 >= current["nb_groups"]:
                 Current.updateCurrentStatus(Constants.END)
