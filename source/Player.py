@@ -53,10 +53,10 @@ def updatePlayers(series, player_names_str):
             players[player][group["_id"] + "_point"] = 0
             
             for question in questions[int(group["_id"][1])]:
-                print question
-                players[player][question["_id"] + "_answer"] = -1
-                players[player][question["_id"] + "_time"] = -1.0
-                players[player][question["_id"] + "_point"] = 0     
+                if int(question["_id"][3:]) < group["group_nb_questions"]:
+                    players[player][question["_id"] + "_answer"] = -1
+                    players[player][question["_id"] + "_time"] = -1.0
+                    players[player][question["_id"] + "_point"] = 0     
     
     for pl in players.keys():
         PlayerCollection.update_one({"_id": players[pl]["_id"]}, {"$set": players[pl]}, upsert=True)
