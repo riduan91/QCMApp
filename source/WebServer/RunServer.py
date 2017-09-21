@@ -261,6 +261,21 @@ def admin_partial_reset():
     else:
         return redirect(url_for('admin_games'))
 
+
+@app.route("/admin_impose_point", methods = ['GET', 'POST'])
+def admin_impose_point():
+    if request.method == 'POST':
+        current = Current.fetchCurrent()
+        
+        parameters = request.form
+
+        Player.imposePoint(current, parameters["player_name_to_impose"], int(parameters["points_to_impose"]))
+        
+        return redirect(url_for('admin_games'))
+    else:
+        return redirect(url_for('admin_games'))
+
+    
 #---------------------ADMIN-START---------------------
 
 @app.route("/player_games", methods = ['GET', 'POST'])

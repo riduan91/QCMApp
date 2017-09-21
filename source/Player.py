@@ -147,6 +147,16 @@ def haveRightToAnswer(current, player_name):
         if "question_answer" in question.keys() and question["question_answer"] in current_answers:
             return False
     return True
+
+def imposePoint(current, player_name, point):
+    mongo_client = MongoClient('localhost', 27017)
+
+    DB = mongo_client[Constants.DBNAME]
+    PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
+    
+    PlayerCollection.update_one({"_id": player_name}, {"$set": {"point" : point}}, upsert=True)
+    mongo_client.close()
+   
    
 def loseTurnInNextQuestion(DB, current, player_name):
     PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
