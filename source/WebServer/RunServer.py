@@ -104,7 +104,11 @@ def admin_start():
         
         Current.updateCurrentSeriesName(series)
         Current.updateCurrentGroup(0)
+        Current.updateCurrentQuestion(0)
+        Current.updateCurrentStatus(1)
         Current.updateCurrentPlayers(parameters["players"])
+
+        Current.resetCurrentGameScore(parameters["players"])
         
         groups = Group.fetchGroups(parameters["series"]) 
         Current.updateCurrentNbGroups(len(groups))
@@ -137,12 +141,20 @@ def admin_games():
         time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
         if int(time_to_display) == 0:
             Current.updateCurrentStatus(Constants.WAITING_Q)
+    
+    if (current["status"] == Constants.ACTIVE_Q or Constants.WAITING_Q) and group["group_group_duration"] > 0 and group["group_start_timestamp"] > 0:
+        if (question["question_duration"] < 0):
+            time_to_display = min(max(round(group['group_start_timestamp']/1000 + group['group_group_duration'] - ttmp/1000, 2), 0), group['group_group_duration'])
+            if int(time_to_display) == 0:
+                Current.updateCurrentStatus(Constants.END_G)
+        elif group["group_start_timestamp"] + group["group_group_duration"] * 1000 < ttmp:
+            Current.updateCurrentStatus(Constants.END_G)           
 
     if current["status"] == Constants.WAITING_Q and group["group_next_question_on"] == 1:
-        time.sleep(5)
+        time.sleep(2)
         if current["question"] + 1 >= group["group_nb_questions"]:
             if current["group"] + 1 >= current["nb_groups"]:
-                Current.updateCurrentStatus(Constants.END)
+                Current.updateCurrentStatus(Constants.END_G)
             else:
                 group_index = current["group"] + 1
                 Current.updateCurrentGroup(int(group_index))
@@ -171,6 +183,8 @@ def admin_start_group():
         Current.updateCurrentGroup(int(group_index))
         Current.updateCurrentQuestion(0)
         Current.updateCurrentStatus(Constants.START_G)
+        current = Current.fetchCurrent()
+        Current.updateGroupTimestamp(current, 0)
         return redirect(url_for('admin_games'))
     else:
         return redirect(url_for('admin_games'))
@@ -205,9 +219,13 @@ def admin_waiting_question():
 
 @app.route("/admin_end_group", methods = ['GET', 'POST'])
 def admin_end_group():
-    # ACTIVE Q --> WAITING Q
+    # WAITING Q --> END G
     if request.method == "POST":
+        current = Current.fetchCurrent()
+        players = Player.fetchAllPlayers(current)
+        Current.updateCurrentGameScore(players)
         Current.updateCurrentStatus(Constants.END_G)
+        
         return redirect(url_for('admin_games'))
     else:
         return redirect(url_for('admin_games'))
@@ -230,8 +248,9 @@ def admin_reset():
         players = ",".join(Current["players"])
         Current.updateCurrentSeriesName(series)
         Current.updateCurrentGroup(0)
+        Current.updateCurrentQuestion(0)
         Current.updateCurrentPlayers(players)
-        
+        Current.resetCurrentGameScore(players)
         Player.updatePlayers(series, players)
         Question.resetArrays(series)
         
@@ -290,6 +309,9 @@ def player_games():
         time_to_display = -1
         if current["status"] == Constants.ACTIVE_Q and question["question_duration"] > 0:
             time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
+        elif (current["status"] == Constants.ACTIVE_Q or current["status"] == Constants.WAITING_Q) and group["group_group_duration"] > 0:
+            time_to_display = min(max(round(group['group_start_timestamp']/1000 + group['group_group_duration'] - ttmp/1000, 2), 0), group['group_group_duration'])
+        
         if type(player) != None:
             return render_template("player_games.html", result = (current, series, group, question, players, Constants.ALPHABET, time_to_display, player))
         else:

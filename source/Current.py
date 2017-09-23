@@ -76,6 +76,26 @@ def updateCurrentNbGroups(nb):
     CurrentCollection.update_one({"_id": "current"}, {"$set": {"nb_groups": nb}}, upsert=True)
     mongo_client.close()
     
+def updateCurrentGameScore(players):
+    mongo_client = MongoClient('localhost', 27017)
+    DB = mongo_client[Constants.DBNAME]
+    CurrentCollection = DB[Constants.CURRENT]
+    for player in players:
+        CurrentCollection.update_one({"_id": "current"}, {"$set": {"game_score." + player["_id"] : player["point"]} }, upsert=True)
+    mongo_client.close()
+
+def resetCurrentGameScore(player_names_str):
+    mongo_client = MongoClient('localhost', 27017)
+    DB = mongo_client[Constants.DBNAME]
+    CurrentCollection = DB[Constants.CURRENT]
+    player_names_str = player_names_str.replace(" , ", ",").replace(", ", ",").replace(" ,", ",").replace(" ", "_")
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"game_score": {} } }, upsert=True)
+    player_names = player_names_str.split(",")
+    for player_name in player_names:
+        CurrentCollection.update_one({"_id": "current"}, {"$set": {"game_score." + player_name : 0 } }, upsert=True)
+    mongo_client.close()
+
+
 def activateQuestion(current):
     mongo_client = MongoClient('localhost', 27017)
     DB = mongo_client[Constants.DBNAME]
