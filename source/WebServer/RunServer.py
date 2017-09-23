@@ -153,13 +153,7 @@ def admin_games():
     if current["status"] == Constants.WAITING_Q and group["group_next_question_on"] == 1:
         time.sleep(2)
         if current["question"] + 1 >= group["group_nb_questions"]:
-            if current["group"] + 1 >= current["nb_groups"]:
-                Current.updateCurrentStatus(Constants.END_G)
-            else:
-                group_index = current["group"] + 1
-                Current.updateCurrentGroup(int(group_index))
-                Current.updateCurrentQuestion(0)
-                Current.updateCurrentStatus(Constants.START_G)
+            Current.updateCurrentStatus(Constants.END_G)
         else:
             question_index = current["question"] + 1
             Current.updateCurrentQuestion(question_index)

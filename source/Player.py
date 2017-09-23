@@ -155,8 +155,10 @@ def imposePoint(current, player_name, point):
 
     DB = mongo_client[Constants.DBNAME]
     PlayerCollection = DB[current["series"] + "__" + Constants.PLAYER_SUFFIX]
+    CurrentCollection = DB[Constants.CURRENT]
     
     PlayerCollection.update_one({"_id": player_name}, {"$set": {"point" : point}}, upsert=True)
+    CurrentCollection.update_one({"_id": "current"}, {"$set": {"game_score." + player_name : point} }, upsert=True)
     mongo_client.close()
    
    
