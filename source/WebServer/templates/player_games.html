@@ -90,7 +90,7 @@
 				<tr>
 					<td>Câu {{ q+1 }}</td>
 					{% for p in result[4] %}
-						{% if result[5][p["G" + result[0]['group']|string + "Q" + q|string + "_star"]] == 1%}
+						{% if p["G" + result[0]['group']|string + "Q" + q|string + "_star"] == 1%}
 							<td>{{result[5][p["G" + result[0]['group']|string + "Q" + q|string + "_answer"]]}}*</td>
 						{% else %}
 							<td>{{result[5][p["G" + result[0]['group']|string + "Q" + q|string + "_answer"]]}}</td>
