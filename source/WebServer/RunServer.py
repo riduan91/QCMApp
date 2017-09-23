@@ -137,8 +137,6 @@ def admin_games():
         time_to_display = min(max(round(question['question_start_timestamp']/1000 + question['question_duration'] - ttmp/1000, 2), 0), question['question_duration'])
         if int(time_to_display) == 0:
             Current.updateCurrentStatus(Constants.WAITING_Q)
-    if current["status"] == Constants.ACTIVE_Q and question["question_duration"] <= 0:
-        Current.updateCurrentStatus(Constants.WAITING_Q)
 
     if current["status"] == Constants.WAITING_Q and group["group_next_question_on"] == 1:
         time.sleep(5)
