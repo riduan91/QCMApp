@@ -142,7 +142,7 @@ def admin_games():
         if int(time_to_display) == 0:
             Current.updateCurrentStatus(Constants.WAITING_Q)
     
-    if (current["status"] == Constants.ACTIVE_Q or Constants.WAITING_Q) and group["group_group_duration"] > 0 and group["group_start_timestamp"] > 0:
+    if (current["status"] == Constants.ACTIVE_Q or current["status"] == Constants.WAITING_Q) and group["group_group_duration"] > 0 and group["group_start_timestamp"] > 0:
         if (question["question_duration"] < 0):
             time_to_display = min(max(round(group['group_start_timestamp']/1000 + group['group_group_duration'] - ttmp/1000, 2), 0), group['group_group_duration'])
             if int(time_to_display) == 0:
