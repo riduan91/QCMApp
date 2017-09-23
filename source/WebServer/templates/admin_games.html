@@ -129,6 +129,11 @@
 				<input type="number" name="next_question_index" value=0 style="display:none" />
 				<input type="submit" value="Bắt đầu câu hỏi số 1" />
 			</form> 
+		{% elif result[0]['status'] == 2%}
+			<form action="/admin_waiting_question" method = "POST">
+				<input type="number" name="next_question_index" value=0 style="display:none" />
+				<input type="submit" value="Dừng câu hỏi" />
+			</form> 
 		{% elif result[0]['status'] == 3 and result[0]['question'] + 1 < result[2]['group_nb_questions'] %}
 			<form action="/admin_start_question" method = "POST">
 				<input type="number" name="next_question_index" value={{result[0]['question'] + 1}} style="display:none" />
