@@ -145,11 +145,21 @@
 					{% endif %}
 					<td>{{p["G" + result[0]['group']|string + "Q" + result[0]['question']|string + "_point"]}}</td>
 					<td>
-						<form action="/admin_impose_point" method = "POST">
+						<form action="/admin_impose_point" method = "POST" style="display:inline;">
 							<input type="text" name="player_name_to_impose" value="{{p['_id']}}" style="display:none" />
 							<input type="number" name="points_to_impose" value="{{p['point']}}" style="width:60px;"/>
 							<input type="submit" value="Sửa" style="display:inline;"/>
 						</form> 
+						<form action="/admin_update_point" method = "POST" style="display:inline;">
+							<input type="text" name="player_name_to_impose" value="{{p['_id']}}" style="display:none" />
+							<input type="number" name="add_or_remove" value=1 style="display:none;"/>
+							<input type="submit" value="+" style="display:inline;"/>
+						</form> 
+						<form action="/admin_update_point" method = "POST" style="display:inline;">
+							<input type="text" name="player_name_to_impose" value="{{p['_id']}}" style="display:none" />
+							<input type="number" name="add_or_remove" value=-1 style="display:none;"/>
+							<input type="submit" value="-" style="display:inline;"/>
+						</form> 						
 					</td>				
 				</tr>
 			{% endfor %}

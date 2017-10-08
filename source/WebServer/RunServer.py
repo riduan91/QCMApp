@@ -286,6 +286,30 @@ def admin_impose_point():
     else:
         return redirect(url_for('admin_games'))
 
+@app.route("/admin_update_point", methods = ['GET', 'POST'])
+def admin_update_point():
+    if request.method == 'POST':
+        current = Current.fetchCurrent()
+        
+        parameters = request.form
+        add_or_remove = int(parameters["add_or_remove"])
+        Player.updatePoint(current, parameters["player_name_to_impose"], add_or_remove)
+        group = Current.fetchCurrentGroup(current)
+        if group["group_answer_mode"] <= 1 and current["question"] + 1 < group["group_nb_questions"]:
+            question_index = current["question"] + 1
+            Current.updateCurrentQuestion(question_index)
+            current = Current.fetchCurrent()
+            timestamp = int(time.time()*1000) + 2000
+            Current.updateQuestionTimestamp(current, timestamp)
+            Current.activateQuestion(current)
+            if question_index == 0:
+                Current.updateGroupTimestamp(current, timestamp)
+            Current.updateCurrentStatus(Constants.ACTIVE_Q)
+        
+        return redirect(url_for('admin_games'))
+    else:
+        return redirect(url_for('admin_games'))
+
     
 #---------------------ADMIN-START---------------------
 
